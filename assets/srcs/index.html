@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" class="wa-theme-default">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storier</title>
+
+    <!-- Import map: resolves bare specifiers that Web Awesome's ESM bundle needs -->
+    <script type="importmap">
+    {
+        "imports": {
+            "lit": "https://cdn.jsdelivr.net/npm/lit@3/index.js",
+            "lit/decorators.js": "https://cdn.jsdelivr.net/npm/lit@3/decorators.js",
+            "lit/directive-helpers.js": "https://cdn.jsdelivr.net/npm/lit@3/directive-helpers.js",
+            "@shoelace-style/animations": "https://cdn.jsdelivr.net/npm/@shoelace-style/animations@1.2.0/dist/index.js",
+            "@shoelace-style/localize": "https://cdn.jsdelivr.net/npm/@shoelace-style/localize@3.2.3/dist/index.js"
+        }
+    }
+    </script>
+
+    <!-- Web Awesome: theme + autoloader + utilities (dist-cdn = fully self-contained, no bare specifier imports) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/themes/default.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/webawesome.loader.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@awesome.me/webawesome@3.14.0/dist-cdn/styles/utilities.css">
+
+    <!-- Fonts: Inter (sans) + Playfair Display (serif), with CJK counterparts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Markdown renderer -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<div id="app">
+
+    <!-- ── Sidebar ─────────────────────────────────────────── -->
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="app-logo">
+                <wa-icon name="book-open" library="system" variant="solid"
+                    style="font-size:1.3em; color: var(--wa-color-brand-50)"></wa-icon>
+                <span class="logo-text">Storier</span>
+            </div>
+            <wa-button id="btn-new-storybook" variant="neutral" appearance="text" size="s"
+                title="New Storybook">
+                <wa-icon name="plus"></wa-icon>
+            </wa-button>
+        </div>
+
+        <p class="sidebar-section-label">Storybooks</p>
+        <div id="storybook-list" class="storybook-list"></div>
+
+        <div class="sidebar-footer">
+            <wa-button id="btn-toggle-theme" variant="neutral" appearance="text" size="s"
+                title="Toggle Theme">
+                <wa-icon id="icon-theme" name="sun"></wa-icon>
+            </wa-button>
+            <wa-button id="btn-toggle-font" variant="neutral" appearance="text" size="s"
+                title="Toggle Font Style">
+                <wa-icon name="font"></wa-icon>
+            </wa-button>
+            <wa-button id="btn-toggle-lang" variant="neutral" appearance="text" size="s"
+                title="Language">
+                <span id="lang-label">EN</span>
+            </wa-button>
+        </div>
+    </aside>
+
+    <!-- ── Main content ────────────────────────────────────── -->
+    <main id="main-content">
+
+        <!-- Empty state shown when no storybook is selected -->
+        <div id="empty-state" class="empty-state">
+            <wa-icon name="book-open" library="system" variant="regular"
+                style="font-size:3.5em; color: var(--wa-color-neutral-60)"></wa-icon>
+            <h2 class="empty-title">Welcome to Storier</h2>
+            <p class="empty-desc">Create a new storybook to start designing your story.</p>
+            <wa-button id="btn-create-first" variant="neutral" appearance="outlined">
+                <wa-icon name="plus" slot="prefix"></wa-icon>
+                New Storybook
+            </wa-button>
+        </div>
+
+        <!-- Story view shown when a storybook is active -->
+        <div id="story-view" class="story-view hidden">
+            <header class="toolbar">
+                <div class="toolbar-left">
+                    <h1 id="story-title" class="story-title"></h1>
+                    <span id="story-author" class="story-author"></span>
+                </div>
+                <div class="toolbar-center">
+                    <div class="search-bar">
+                        <wa-icon name="magnifying-glass" class="search-icon"></wa-icon>
+                        <input id="search-input" type="text" class="search-input"
+                            placeholder="Search elements…">
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <wa-button-group>
+                        <wa-button id="sort-date" data-sort="edit-date" variant="neutral" appearance="outlined" size="s" title="Sort by edit date">
+                            <wa-icon name="clock"></wa-icon>
+                        </wa-button>
+                        <wa-button id="sort-az" data-sort="a-z" variant="neutral" appearance="outlined" size="s" title="Sort A to Z">
+                            <wa-icon name="arrow-down-a-z"></wa-icon>
+                        </wa-button>
+                        <wa-button id="sort-imp" data-sort="importance" variant="neutral" appearance="outlined" size="s" title="Sort by connections">
+                            <wa-icon name="link"></wa-icon>
+                        </wa-button>
+                    </wa-button-group>
+                    <wa-button id="btn-manage-schema" variant="neutral" appearance="outlined" size="s" title="Manage schema">
+                        <wa-icon name="sliders" slot="prefix"></wa-icon>
+                        Schema
+                    </wa-button>
+                    <wa-button id="btn-add-element" variant="neutral" appearance="outlined" size="s">
+                        <wa-icon name="plus" slot="prefix"></wa-icon>
+                        Add Element
+                    </wa-button>
+                </div>
+            </header>
+
+            <div id="type-filter-bar" class="type-filter-bar"></div>
+            <div id="dashboard" class="dashboard"></div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal overlay -->
+<div id="modal-overlay" class="modal-overlay hidden" role="dialog" aria-modal="true">
+    <div id="modal-container"></div>
+</div>
+
+<script type="module" src="js/main.js?v=2"></script>
+</body>
+</html>
