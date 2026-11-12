@@ -1,6 +1,6 @@
 // Curated icon set for the icon picker.
-// All names are Font Awesome 6 free (solid) icons confirmed working with
-// Web Awesome's bundled icon CDN (https://ka-f.fontawesome.com v7.3.0).
+// All names are Font Awesome 6 free (solid) icons, bundled locally in
+// icon-svgs.js and rendered by the local <wa-icon> custom element.
 // Each category has exactly 24 icons.
 
 export const ICON_CATEGORIES = [

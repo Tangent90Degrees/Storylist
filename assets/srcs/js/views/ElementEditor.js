@@ -1,4 +1,4 @@
-// ElementEditor — full create/edit modal using Web Awesome components.
+// ElementEditor — full create/edit modal.
 
 import { t } from '../utils/i18n.js'
 import ColorPicker from './ColorPicker.js'

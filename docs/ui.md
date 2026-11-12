@@ -38,7 +38,7 @@ The type badge and group badges appear on a single line below the element name. 
 2. When there is not enough space, badges are collapsed from last to first (keeping the first badge always full): each collapses to icon-only, or to the first letter of its name if it has no icon.
 3. If there is still not enough space, the remaining badges are removed from the end and replaced by a single gray `+N` badge showing the count of omitted badges.
 
-This is implemented in JavaScript after render, using a double `requestAnimationFrame` to let Web Awesome icon components finish upgrading before measuring.
+This is implemented in JavaScript after render, using a double `requestAnimationFrame` to let `<wa-icon>` custom elements finish rendering before measuring.
 
 #### Property card display
 
@@ -73,7 +73,7 @@ For color picking features, instead of providing a free-form color picker, use a
 
 ### Icon pickers
 
-Use a unified icon selector backed by Font Awesome 6 free (solid) icons via Web Awesome's bundled CDN. Icons are organised into six categories: Nature, People, Objects, Places, Events, Symbols.
+Use a unified icon selector backed by Font Awesome 6 Free (solid) icons, bundled locally in `icon-svgs.js`. Icons are organised into six categories: Nature, People, Objects, Places, Events, Symbols.
 
 Each option of an enum property can also have its own icon, chosen from the same picker. This icon is shown in front of the option label wherever the option is displayed as a pill tag.
 

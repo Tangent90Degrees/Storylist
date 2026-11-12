@@ -1,0 +1,287 @@
+/* ================================================================
+   Storier — design tokens + component base styles
+   Defines all --wa-* custom properties so CSS throughout the project
+   keeps working unchanged. Dark mode: toggle .wa-dark on <html>.
+================================================================ */
+
+/* ── 1. Light-mode tokens ────────────────────────────────────── */
+:root {
+    /* Border radii */
+    --wa-border-radius-s   : 4px;
+    --wa-border-radius-m   : 6px;
+    --wa-border-radius-l   : 10px;
+    --wa-border-radius-pill: 9999px;
+
+    /* Spacing */
+    --wa-space-2xs: 4px;
+    --wa-space-xs : 8px;
+    --wa-space-s  : 12px;
+    --wa-space-m  : 16px;
+    --wa-space-l  : 24px;
+    --wa-space-xl : 48px;
+
+    /* Shadows */
+    --wa-shadow-xs: 0 1px 2px rgba(0,0,0,.05);
+    --wa-shadow-s : 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
+    --wa-shadow-m : 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+    --wa-shadow-l : 0 10px 15px rgba(0,0,0,.10), 0 4px 6px rgba(0,0,0,.05);
+
+    /* Transition */
+    --wa-transition-fast: 150ms ease;
+
+    /* Brand (blue) */
+    --wa-color-brand-40          : #2563eb;
+    --wa-color-brand-50          : #3b82f6;
+    --wa-color-brand-border-loud : #2563eb;
+    --wa-color-brand-border-normal: #93c5fd;
+    --wa-color-brand-border-quiet: #bfdbfe;
+    --wa-color-brand-fill-loud   : #3b82f6;
+    --wa-color-brand-fill-quiet  : #eff6ff;
+    --wa-color-brand-on-quiet    : #1d4ed8;
+
+    /* Danger (red) */
+    --wa-color-danger-50         : #ef4444;
+    --wa-color-danger-500        : #ef4444;
+    --wa-color-danger-fill-quiet : #fef2f2;
+
+    /* Neutral */
+    --wa-color-neutral-60          : #6b7280;
+    --wa-color-neutral-border-normal: #9ca3af;
+    --wa-color-neutral-border-quiet : #d1d5db;
+    --wa-color-neutral-fill-quiet   : #f3f4f6;
+
+    /* Modal overlay */
+    --wa-color-overlay-modal: rgba(0,0,0,.45);
+
+    /* Surfaces */
+    --wa-color-surface-border : #e5e7eb;
+    --wa-color-surface-default: #ffffff;
+    --wa-color-surface-lowered: #f9fafb;
+    --wa-color-surface-raised : #ffffff;
+
+    /* Text */
+    --wa-color-text-normal: #111827;
+    --wa-color-text-quiet : #6b7280;
+}
+
+/* ── 2. Dark-mode token overrides ───────────────────────────── */
+.wa-dark {
+    --wa-color-brand-40          : #93c5fd;
+    --wa-color-brand-50          : #60a5fa;
+    --wa-color-brand-border-loud : #60a5fa;
+    --wa-color-brand-border-normal: #3b6fe2;
+    --wa-color-brand-border-quiet: #1e3a7a;
+    --wa-color-brand-fill-loud   : #2563eb;
+    --wa-color-brand-fill-quiet  : #1e3a6a;
+    --wa-color-brand-on-quiet    : #93c5fd;
+
+    --wa-color-danger-50         : #f87171;
+    --wa-color-danger-500        : #f87171;
+    --wa-color-danger-fill-quiet : #450a0a;
+
+    --wa-color-neutral-60          : #9ca3af;
+    --wa-color-neutral-border-normal: #4b5563;
+    --wa-color-neutral-border-quiet : #374151;
+    --wa-color-neutral-fill-quiet   : #1f2937;
+
+    --wa-color-overlay-modal: rgba(0,0,0,.65);
+
+    --wa-color-surface-border : #374151;
+    --wa-color-surface-default: #1f2937;
+    --wa-color-surface-lowered: #111827;
+    --wa-color-surface-raised : #1f2937;
+
+    --wa-color-text-normal: #f9fafb;
+    --wa-color-text-quiet : #9ca3af;
+
+    --wa-shadow-xs: 0 1px 2px rgba(0,0,0,.30);
+    --wa-shadow-s : 0 1px 3px rgba(0,0,0,.40), 0 1px 2px rgba(0,0,0,.30);
+    --wa-shadow-m : 0 4px 6px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.25);
+    --wa-shadow-l : 0 10px 15px rgba(0,0,0,.45), 0 4px 6px rgba(0,0,0,.30);
+}
+
+/* ── 3. wa-icon ──────────────────────────────────────────────── */
+wa-icon {
+    display       : inline-flex;
+    align-items   : center;
+    justify-content: center;
+    width         : 1em;
+    height        : 1em;
+    flex-shrink   : 0;
+    vertical-align: -0.125em;  /* optical baseline alignment */
+}
+
+wa-icon svg {
+    display : block;
+    width   : 100%;
+    height  : 100%;
+    fill    : currentColor;
+    overflow: visible;
+}
+
+/* ── 4. wa-button ────────────────────────────────────────────── */
+wa-button {
+    display        : inline-flex;
+    align-items    : center;
+    justify-content: center;
+    gap            : 6px;
+    padding        : 0 12px;
+    min-height     : var(--ctrl-h, 32px);
+    border-radius  : var(--radius, var(--wa-border-radius-m));
+    border         : 1px solid transparent;
+    background     : transparent;
+    font-family    : inherit;
+    font-size      : 13px;
+    font-weight    : 500;
+    line-height    : 1;
+    color          : var(--wa-color-text-normal);
+    cursor         : pointer;
+    white-space    : nowrap;
+    text-decoration: none;
+    -webkit-user-select: none;
+    user-select    : none;
+    outline        : none;
+    transition     :
+        background   var(--wa-transition-fast),
+        border-color var(--wa-transition-fast),
+        color        var(--wa-transition-fast);
+    box-sizing     : border-box;
+}
+
+wa-button:focus-visible {
+    outline       : 2px solid var(--wa-color-brand-50);
+    outline-offset: 2px;
+}
+
+wa-button[disabled],
+wa-button[disabled]:hover {
+    opacity       : 0.5;
+    cursor        : not-allowed;
+    pointer-events: none;
+}
+
+/* size=s */
+wa-button[size="s"] {
+    min-height: var(--ctrl-h-sm, 28px);
+    padding   : 0 8px;
+    font-size : 12px;
+    gap       : 4px;
+}
+
+/* ── Neutral ── */
+wa-button[variant="neutral"][appearance="text"],
+wa-button[variant="neutral"][appearance="text"]:visited {
+    background  : transparent;
+    border-color: transparent;
+    color       : var(--wa-color-text-normal);
+}
+wa-button[variant="neutral"][appearance="text"]:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+}
+
+wa-button[variant="neutral"][appearance="outlined"] {
+    background  : transparent;
+    border-color: var(--wa-color-surface-border);
+    color       : var(--wa-color-text-normal);
+}
+wa-button[variant="neutral"][appearance="outlined"]:hover {
+    background  : var(--wa-color-neutral-fill-quiet);
+    border-color: var(--wa-color-neutral-border-quiet);
+}
+
+wa-button[variant="neutral"]:not([appearance]) {
+    background  : var(--wa-color-surface-raised);
+    border-color: var(--wa-color-surface-border);
+    color       : var(--wa-color-text-normal);
+}
+wa-button[variant="neutral"]:not([appearance]):hover {
+    background: var(--wa-color-neutral-fill-quiet);
+}
+
+/* ── Brand ── */
+wa-button[variant="brand"][appearance="outlined"] {
+    background  : transparent;
+    border-color: var(--wa-color-brand-border-normal);
+    color       : var(--wa-color-brand-40);
+}
+wa-button[variant="brand"][appearance="outlined"]:hover {
+    background  : var(--wa-color-brand-fill-quiet);
+    border-color: var(--wa-color-brand-border-loud);
+}
+
+wa-button[variant="brand"]:not([appearance]) {
+    background  : var(--wa-color-brand-50);
+    border-color: var(--wa-color-brand-50);
+    color       : #fff;
+}
+wa-button[variant="brand"]:not([appearance]):hover {
+    background  : var(--wa-color-brand-40);
+    border-color: var(--wa-color-brand-40);
+}
+
+/* ── Danger ── */
+wa-button[variant="danger"][appearance="outlined"] {
+    background  : transparent;
+    border-color: var(--wa-color-danger-500);
+    color       : var(--wa-color-danger-50);
+}
+wa-button[variant="danger"][appearance="outlined"]:hover {
+    background: var(--wa-color-danger-fill-quiet);
+}
+
+wa-button[variant="danger"]:not([appearance]) {
+    background  : var(--wa-color-danger-50);
+    border-color: var(--wa-color-danger-50);
+    color       : #fff;
+}
+
+/* Sort-button active state (was wa-button[data-sort].sort-active::part(base)) */
+wa-button[data-sort].sort-active {
+    background  : var(--wa-color-brand-fill-quiet);
+    border-color: var(--wa-color-brand-border-quiet);
+    color       : var(--wa-color-brand-on-quiet);
+}
+
+/* wa-icon inside wa-button */
+wa-button wa-icon {
+    font-size: 0.9em;
+    flex-shrink: 0;
+}
+
+/* ── 5. wa-button-group ──────────────────────────────────────── */
+wa-button-group {
+    display: inline-flex;
+}
+
+wa-button-group wa-button {
+    border-radius: 0;
+    position: relative;
+}
+
+wa-button-group wa-button + wa-button {
+    margin-left: -1px;
+}
+
+wa-button-group wa-button:first-child {
+    border-radius:
+        var(--radius, var(--wa-border-radius-m))
+        0 0
+        var(--radius, var(--wa-border-radius-m));
+}
+
+wa-button-group wa-button:last-child {
+    border-radius:
+        0
+        var(--radius, var(--wa-border-radius-m))
+        var(--radius, var(--wa-border-radius-m))
+        0;
+}
+
+wa-button-group wa-button:only-child {
+    border-radius: var(--radius, var(--wa-border-radius-m));
+}
+
+wa-button-group wa-button:hover,
+wa-button-group wa-button:focus-visible {
+    z-index: 1;
+}

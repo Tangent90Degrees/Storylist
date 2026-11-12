@@ -1,6 +1,6 @@
 // Minimal modal controller. Renders arbitrary HTML into #modal-container,
 // manages the overlay open/close, and forwards primary button actions.
-// Uses Web Awesome components (wa-button, wa-icon) instead of Lucide.
+// Uses <wa-button> and <wa-icon> custom elements (local, no CDN).
 
 export default class Modal {
     constructor() {

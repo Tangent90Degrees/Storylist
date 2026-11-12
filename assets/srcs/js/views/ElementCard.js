@@ -1,4 +1,4 @@
-// ElementCard — renders a single story element card using Web Awesome icons.
+// ElementCard — renders a single story element card.
 
 import { getColorValue, getColorDarker, getColorLighter } from '../data/colors.js'
 import { stripMarkdown, relativeTime } from '../utils/helpers.js'

@@ -1,10 +1,11 @@
 /* ================================================================
-   Storier — main stylesheet (Web Awesome edition)
-   Relies on Web Awesome's CSS custom properties for colors,
-   spacing, shadows, and radii. Dark mode is handled by toggling
-   .wa-dark on <html>; no overrides needed here.
+   Storier — main stylesheet
+   Design tokens (--wa-*) and component base styles live in
+   tokens.css, loaded before this file. Dark mode is handled by
+   toggling .wa-dark on <html>.
 ================================================================ */
 
+@import './tokens.css';
 @import './card.css';
 @import './modal.css';
 @import './switcher.css';
@@ -330,8 +331,8 @@ h3 {
     flex-wrap  : nowrap;
 }
 
-/* Active state for sort buttons — soft brand fill, not solid */
-wa-button[data-sort].sort-active::part(base) {
+/* Active state for sort buttons */
+wa-button[data-sort].sort-active {
     background  : var(--wa-color-brand-fill-quiet);
     border-color: var(--wa-color-brand-border-quiet);
     color       : var(--wa-color-brand-on-quiet);

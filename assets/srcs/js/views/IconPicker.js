@@ -1,4 +1,4 @@
-// Icon picker — shows Font Awesome icons (via Web Awesome's <wa-icon>)
+// Icon picker — shows Font Awesome 6 Free icons via the local <wa-icon> element.
 // grouped by category. The selected icon is highlighted; clicking fires
 // onChange(iconName).
 

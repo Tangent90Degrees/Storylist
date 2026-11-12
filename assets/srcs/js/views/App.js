@@ -51,7 +51,7 @@ export default class App {
             this.#font = s.font || 'sans'
             setLocale(s.locale || 'en')
         }
-        // Web Awesome uses .wa-dark on <html> for dark mode
+        // Toggle .wa-dark on <html> for dark mode
         this._applyTheme()
         document.documentElement.dataset.font = this.#font
     }
