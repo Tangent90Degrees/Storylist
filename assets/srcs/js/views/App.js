@@ -326,7 +326,7 @@ export default class App {
     }
 
     _colorVal(colorId) {
-        // Inline colour lookup to avoid async in render path
+        // Inline color lookup to avoid async in render path
         const map = {
             rose: '#f43f5e', pink: '#ec4899', fuchsia: '#d946ef', violet: '#8b5cf6',
             indigo: '#6366f1', blue: '#3b82f6', sky: '#0ea5e9', cyan: '#06b6d4', teal: '#14b8a6',

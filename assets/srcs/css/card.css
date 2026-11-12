@@ -5,103 +5,134 @@
    container of column divs. The column widths are computed by JS
    and the gap is applied via flex gap. */
 .dashboard {
-    display: flex;
+    display    : flex;
     align-items: flex-start;
-    gap: var(--wa-space-m);
-    padding: var(--wa-space-l);
+    gap        : var(--wa-space-m);
+    padding    : var(--wa-space-l);
 }
 
 /* Each masonry column is a flex column of cards */
 .dashboard-col {
-    flex: 1;
-    min-width: 0;
-    display: flex;
+    flex          : 1;
+    min-width     : 0;
+    display       : flex;
     flex-direction: column;
-    gap: var(--wa-space-m);
+    gap           : var(--wa-space-m);
 }
 
 .dashboard-empty {
-    flex: 1;
-    display: flex; flex-direction: column; align-items: center;
-    gap: var(--wa-space-s); padding: 100px var(--wa-space-l);
-    color: var(--wa-color-text-quiet); text-align: center;
+    flex          : 1;
+    display       : flex;
+    flex-direction: column;
+    align-items   : center;
+    gap           : var(--wa-space-s);
+    padding       : 100px var(--wa-space-l);
+    color         : var(--wa-color-text-quiet);
+    text-align    : center;
 }
 
 .dashboard-empty wa-icon {
-    font-size: 2.5em; color: var(--wa-color-neutral-60);
+    font-size    : 2.5em;
+    color        : var(--wa-color-neutral-60);
     margin-bottom: var(--wa-space-s);
 }
-.dashboard-empty p  { font-size: 0.95rem; font-weight: 500; color: var(--wa-color-text-normal); }
-.dashboard-empty span { font-size: 13px; }
+
+.dashboard-empty p {
+    font-size  : 0.95rem;
+    font-weight: 500;
+    color      : var(--wa-color-text-normal);
+}
+
+.dashboard-empty span {
+    font-size: 13px;
+}
 
 /* Cards in masonry columns have no extra margin — gap on .dashboard-col handles spacing */
 .element-card {
-    break-inside: avoid;
+    break-inside     : avoid;
     page-break-inside: avoid;
-    margin-bottom: 0;
-    background: var(--wa-color-surface-raised);
-    border: 1px solid var(--wa-color-surface-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--wa-shadow-s);
-    cursor: pointer;
+    margin-bottom    : 0;
+    background       : var(--wa-color-surface-raised);
+    border           : 1px solid var(--wa-color-surface-border);
+    border-radius    : var(--radius-lg);
+    box-shadow       : var(--wa-shadow-s);
+    cursor           : pointer;
     /* No transform on hover — avoids the "float up" effect */
-    transition: box-shadow var(--wa-transition-fast),
-                border-color var(--wa-transition-fast);
-    overflow: hidden;
-    animation: cardIn 0.2s ease-out;
+    transition       : box-shadow var(--wa-transition-fast), border-color var(--wa-transition-fast);
+    overflow         : hidden;
+    animation        : cardIn 0.2s ease-out;
 }
 
 .element-card:hover {
-    box-shadow: var(--wa-shadow-m);
+    box-shadow  : var(--wa-shadow-m);
     border-color: var(--wa-color-neutral-border-quiet);
 }
 
 /* No .card-color-bar rule needed — element removed from HTML */
 
-.card-inner { padding: var(--wa-space-m); }
+.card-inner {
+    padding: var(--wa-space-m);
+}
 
 .card-header {
-    display: flex; align-items: flex-start;
-    gap: var(--wa-space-s); margin-bottom: var(--wa-space-s);
+    display      : flex;
+    align-items  : flex-start;
+    gap          : var(--wa-space-s);
+    margin-bottom: var(--wa-space-s);
 }
 
 .card-icon-wrap {
-    width: 44px; height: 44px;
-    border-radius: var(--radius);
+    width          : 44px;
+    height         : 44px;
+    border-radius  : var(--radius);
     /* Solid representative color background, white icon */
-    background: var(--el-color, var(--wa-color-brand-50));
-    color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.3em;
+    background     : var(--el-color, var(--wa-color-brand-50));
+    color          : #fff;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    flex-shrink    : 0;
+    font-size      : 1.3em;
 }
 
-.card-meta { flex: 1; min-width: 0; }
+.card-meta {
+    flex     : 1;
+    min-width: 0;
+}
 
 .card-name {
-    font-size: 14px; font-weight: 600;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-size    : 14px;
+    font-weight  : 600;
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
     margin-bottom: 3px;
 }
 
 /* Badge row: type label + group labels on one line */
 .card-badges {
-    display: flex; align-items: center; gap: 4px;
-    flex-wrap: nowrap;
-    overflow: hidden;
+    display    : flex;
+    align-items: center;
+    gap        : 4px;
+    flex-wrap  : nowrap;
+    overflow   : hidden;
     white-space: nowrap;
 }
 
 .card-badge {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: var(--pill-font-sm); font-weight: 500; line-height: 1.4;
-    padding: var(--pill-pad-sm);
-    min-height: var(--pill-h-sm);
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 3px;
+    font-size    : var(--pill-font-sm);
+    font-weight  : 500;
+    line-height  : 1.4;
+    padding      : var(--pill-pad-sm);
+    min-height   : var(--pill-h-sm);
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--badge-c, var(--wa-color-brand-50)) 14%, transparent);
-    color: var(--badge-text, var(--badge-c, var(--accent-text)));
-    white-space: nowrap;
-    flex-shrink: 0;
+    background   : color-mix(in srgb, var(--badge-c, var(--wa-color-brand-50)) 14%, transparent);
+    color        : var(--badge-text, var(--badge-c, var(--accent-text)));
+    white-space  : nowrap;
+    flex-shrink  : 0;
 }
 
 /* In dark mode, use the lighter text color for stronger contrast */
@@ -110,52 +141,66 @@
 }
 
 .card-badge-more {
-    background: none;
-    color: var(--wa-color-text-quiet);
-    padding: 0 0 0 2px;
-    font-size: 11px;
+    background : none;
+    color      : var(--wa-color-text-quiet);
+    padding    : 0 0 0 2px;
+    font-size  : 11px;
     font-weight: 500;
 }
 
 /* Compact badge: icon-only or first-letter; hides full text */
-.card-badge.card-badge-compact { padding: 1px 6px; }
-.card-badge.card-badge-compact .badge-text { display: none; }
-.card-badge.card-badge-compact .badge-icon { margin-left: 0; }
+.card-badge.card-badge-compact {
+    padding: 1px 6px;
+}
+
+.card-badge.card-badge-compact .badge-text {
+    display: none;
+}
+
+.card-badge.card-badge-compact .badge-icon {
+    margin-left: 0;
+}
 
 /* No-icon compact: show first letter from data attribute */
 .card-badge.card-badge-compact[data-icon=""]::before {
-    content: attr(data-first);
+    content    : attr(data-first);
     font-weight: 600;
 }
 
 /* Icons inside badges and chips */
-.badge-icon, .chip-icon {
-    font-size: 0.9em;
-    flex-shrink: 0;
+.badge-icon,
+.chip-icon {
+    font-size     : 0.9em;
+    flex-shrink   : 0;
     vertical-align: middle;
-    margin-left: -2px;
+    margin-left   : -2px;
 }
 
 .card-star {
-    background: none; border: none; cursor: pointer;
-    color: #eab308;
-    width: 32px; height: 32px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: var(--radius-sm);
-    font-size: 1.15em;
-    transition: opacity var(--wa-transition-fast), color var(--wa-transition-fast);
-    flex-shrink: 0;
+    background     : none;
+    border         : none;
+    cursor         : pointer;
+    color          : #eab308;
+    width          : 32px;
+    height         : 32px;
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    border-radius  : var(--radius-sm);
+    font-size      : 1.15em;
+    transition     : opacity var(--wa-transition-fast), color var(--wa-transition-fast);
+    flex-shrink    : 0;
     /* Move star up so its top gap equals its right gap */
-    margin-top: -4px;
-    margin-right: -4px;
+    margin-top     : -4px;
+    margin-right   : -4px;
     /* Hidden by default — shown on hover or when starred */
-    opacity: 0;
+    opacity        : 0;
 }
 
 /* Show when starred — always visible */
 .card-star.starred {
     opacity: 1;
-    color: #eab308;
+    color  : #eab308;
 }
 
 /* Show on card hover for non-starred */
@@ -164,116 +209,128 @@
 }
 
 .card-desc {
-    font-size: 13px;
-    color: var(--wa-color-text-quiet);
-    line-height: 1.6;
-    overflow: hidden;
-    display: -webkit-box;
+    font-size         : 13px;
+    color             : var(--wa-color-text-quiet);
+    line-height       : 1.6;
+    overflow          : hidden;
+    display           : -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    margin-bottom: var(--wa-space-xs);
+    line-clamp        : 3;
+    margin-bottom     : var(--wa-space-xs);
 }
 
 /* Properties shown on card — two-column grid with full-width multi-enum rows */
 .card-props {
-    display: flex; flex-direction: column;
-    gap: 4px;
-    margin-bottom: var(--wa-space-xs);
+    display       : flex;
+    flex-direction: column;
+    gap           : 4px;
+    margin-bottom : var(--wa-space-xs);
 }
 
 /* A pair of two single-value properties side by side */
 .prop-grid-pair {
     display: flex;
-    gap: var(--wa-space-s);
+    gap    : var(--wa-space-s);
 }
 
 /* Each cell in the pair is a label:value mini-row */
 .prop-grid-cell {
-    flex: 1; min-width: 0;
-    display: flex; align-items: baseline;
-    gap: 4px;
-    font-size: 12px;
-    overflow: hidden;
+    flex       : 1;
+    min-width  : 0;
+    display    : flex;
+    align-items: baseline;
+    gap        : 4px;
+    font-size  : 12px;
+    overflow   : hidden;
 }
 
 /* Full-width row for wide (long/multi) properties */
 .prop-row-full {
-    display: flex; align-items: baseline;
-    gap: var(--wa-space-xs);
-    font-size: 12px;
+    display    : flex;
+    align-items: baseline;
+    gap        : var(--wa-space-xs);
+    font-size  : 12px;
     /* Clip to a single line unless .prop-row-multi overrides */
-    overflow: hidden;
+    overflow   : hidden;
 }
 
 /* Multi-line variant: label top-aligned, value wraps */
 .prop-row-full.prop-row-multi {
     align-items: flex-start;
-    overflow: visible;
+    overflow   : visible;
 }
 
 .prop-row-label {
-    font-size: 11px; font-weight: 500;
-    color: var(--wa-color-text-quiet);
+    font-size  : 11px;
+    font-weight: 500;
+    color      : var(--wa-color-text-quiet);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .prop-row-value {
-    font-size: 12px;
-    color: var(--wa-color-text-normal);
-    font-weight: 500;
-    white-space: nowrap;
-    overflow: hidden;
+    font-size    : 12px;
+    color        : var(--wa-color-text-normal);
+    font-weight  : 500;
+    white-space  : nowrap;
+    overflow     : hidden;
     text-overflow: ellipsis;
-    margin-left: auto;
-    min-width: 0;
-    flex-shrink: 1;
+    margin-left  : auto;
+    min-width    : 0;
+    flex-shrink  : 1;
 }
 
 /* Multi-line value: wraps instead of truncating */
 .prop-row-value.prop-row-multi {
-    white-space: normal;
-    word-break: break-word;
-    overflow: visible;
+    white-space  : normal;
+    word-break   : break-word;
+    overflow     : visible;
     text-overflow: clip;
-    line-height: 1.5;
+    line-height  : 1.5;
 }
 
 /* Multiple chips on one row — aligned to the right */
 .prop-row-values {
-    display: flex; flex-wrap: wrap; gap: 4px;
-    margin-left: auto;
+    display        : flex;
+    flex-wrap      : wrap;
+    gap            : 4px;
+    margin-left    : auto;
     justify-content: flex-end;
     /* Keep chips on same row as label; wrap overflows to new lines right-aligned */
-    align-items: center;
+    align-items    : center;
 }
 
 /* Single-line (long) mode: don't wrap chips, clip overflow instead */
 .prop-row-full:not(.prop-row-multi) .prop-row-values {
     flex-wrap: nowrap;
-    overflow: hidden;
+    overflow : hidden;
     min-width: 0;
 }
 
 /* Short-mode multi-enum chips inside a grid cell — single line, no wrap */
 .prop-row-values-short {
-    flex-wrap: nowrap;
-    overflow: hidden;
-    min-width: 0;
+    flex-wrap      : nowrap;
+    overflow       : hidden;
+    min-width      : 0;
     justify-content: flex-end;
 }
 
 /* Enum value pill — same height/style as .card-badge */
 .prop-chip-card {
-    display: inline-flex; align-items: center; gap: 3px;
-    font-size: var(--pill-font-sm); font-weight: 500; line-height: 1.4;
-    padding: var(--pill-pad-sm);
-    min-height: var(--pill-h-sm);
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 3px;
+    font-size    : var(--pill-font-sm);
+    font-weight  : 500;
+    line-height  : 1.4;
+    padding      : var(--pill-pad-sm);
+    min-height   : var(--pill-h-sm);
     border-radius: var(--radius-pill);
-    background: color-mix(in srgb, var(--chip-c, var(--wa-color-brand-50)) 14%, transparent);
-    color: var(--chip-text, var(--chip-c, var(--wa-color-text-normal)));
-    white-space: nowrap;
-    flex-shrink: 0;
+    background   : color-mix(in srgb, var(--chip-c, var(--wa-color-brand-50)) 14%, transparent);
+    color        : var(--chip-text, var(--chip-c, var(--wa-color-text-normal)));
+    white-space  : nowrap;
+    flex-shrink  : 0;
 }
 
 /* In dark mode, use the lighter text color for stronger contrast */
@@ -282,91 +339,122 @@
 }
 
 /* Compact chip: icon-only or first-letter; hides full text */
-.prop-chip-card.prop-chip-card-compact { padding: 1px 6px; }
-.prop-chip-card.prop-chip-card-compact .chip-text { display: none; }
-.prop-chip-card.prop-chip-card-compact .chip-icon { margin-left: 0; }
+.prop-chip-card.prop-chip-card-compact {
+    padding: 1px 6px;
+}
+
+.prop-chip-card.prop-chip-card-compact .chip-text {
+    display: none;
+}
+
+.prop-chip-card.prop-chip-card-compact .chip-icon {
+    margin-left: 0;
+}
 
 /* No-icon compact: show first letter from data attribute */
 .prop-chip-card.prop-chip-card-compact[data-icon=""]::before {
-    content: attr(data-first);
+    content    : attr(data-first);
     font-weight: 600;
 }
 
 /* Overflow +N chip for enum chips */
 .prop-chip-card-more {
-    background: none;
-    color: var(--wa-color-text-quiet);
-    padding: 0 0 0 2px;
-    font-size: 11px;
+    background : none;
+    color      : var(--wa-color-text-quiet);
+    padding    : 0 0 0 2px;
+    font-size  : 11px;
     font-weight: 500;
 }
 
 .card-tags {
-    display: flex; flex-wrap: nowrap; overflow: hidden;
-    gap: var(--wa-space-2xs);
+    display      : flex;
+    flex-wrap    : nowrap;
+    overflow     : hidden;
+    gap          : var(--wa-space-2xs);
     margin-bottom: var(--wa-space-xs);
 }
 
 .card-tag {
-    display: inline-flex; align-items: center;
-    font-size: var(--pill-font-sm); font-weight: 500;
-    padding: var(--pill-pad-sm);
-    min-height: var(--pill-h-sm);
+    display      : inline-flex;
+    align-items  : center;
+    font-size    : var(--pill-font-sm);
+    font-weight  : 500;
+    padding      : var(--pill-pad-sm);
+    min-height   : var(--pill-h-sm);
     border-radius: var(--radius-pill);
-    background: var(--wa-color-neutral-fill-quiet);
-    color: var(--wa-color-text-quiet);
-    border: 1px solid var(--wa-color-surface-border);
-    flex-shrink: 0;
-    white-space: nowrap;
+    background   : var(--wa-color-neutral-fill-quiet);
+    color        : var(--wa-color-text-quiet);
+    border       : 1px solid var(--wa-color-surface-border);
+    flex-shrink  : 0;
+    white-space  : nowrap;
 }
 
 /* Compact tag: first letter only */
-.card-tag.card-tag-compact { padding: 1px 6px; }
-.card-tag.card-tag-compact .badge-text { display: none; }
+.card-tag.card-tag-compact {
+    padding: 1px 6px;
+}
+
+.card-tag.card-tag-compact .badge-text {
+    display: none;
+}
+
 .card-tag.card-tag-compact::before {
-    content: attr(data-first);
+    content    : attr(data-first);
     font-weight: 600;
 }
 
 /* Plain +N overflow indicator — no pill */
 .card-tag-more {
-    font-size: 11px; font-weight: 500;
-    color: var(--wa-color-text-quiet);
-    padding: 0 0 0 2px;
+    font-size  : 11px;
+    font-weight: 500;
+    color      : var(--wa-color-text-quiet);
+    padding    : 0 0 0 2px;
     white-space: nowrap;
     flex-shrink: 0;
-    align-self: center;
+    align-self : center;
 }
 
 .card-footer {
-    display: flex; align-items: center;
-    margin-top: var(--wa-space-xs);
+    display    : flex;
+    align-items: center;
+    margin-top : var(--wa-space-xs);
     padding-top: 6px;
-    border-top: 1px solid var(--wa-color-surface-border);
-    font-size: 11px;
-    color: var(--wa-color-text-quiet);
+    border-top : 1px solid var(--wa-color-surface-border);
+    font-size  : 11px;
+    color      : var(--wa-color-text-quiet);
 }
 
 .card-conn {
-    display: flex; align-items: center; gap: 3px;
+    display    : flex;
+    align-items: center;
+    gap        : 3px;
     flex-shrink: 0;
 }
 
 /* push time to the right */
-.card-time { margin-left: auto; }
+.card-time {
+    margin-left: auto;
+}
 
 /* ── 10. Empty state ─────────────────────────────────────── */
 .empty-state {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: var(--wa-space-m); height: 100%;
-    padding: var(--wa-space-xl); text-align: center;
+    display        : flex;
+    flex-direction : column;
+    align-items    : center;
+    justify-content: center;
+    gap            : var(--wa-space-m);
+    height         : 100%;
+    padding        : var(--wa-space-xl);
+    text-align     : center;
 }
 
-.empty-title { font-size: 1.4rem; font-weight: 700; }
+.empty-title {
+    font-size  : 1.4rem;
+    font-weight: 700;
+}
 
 .empty-desc {
     font-size: 14px;
-    color: var(--wa-color-text-quiet);
+    color    : var(--wa-color-text-quiet);
     max-width: 340px;
 }
