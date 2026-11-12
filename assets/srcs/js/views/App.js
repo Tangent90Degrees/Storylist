@@ -15,27 +15,27 @@ import SchemaManager from './SchemaManager.js'
 export default class App {
     // ── state ──────────────────────────────────────────────────────────────
     #storybooks = []
-    #elements   = []           // flat list across all storybooks
-    #currentId  = null
-    #sort       = 'edit-date'  // 'edit-date' | 'a-z' | 'importance'
-    #search     = ''
+    #elements = []           // flat list across all storybooks
+    #currentId = null
+    #sort = 'edit-date'  // 'edit-date' | 'a-z' | 'importance'
+    #search = ''
     #filterType = null
-    #theme      = 'light'
-    #font       = 'sans'
+    #theme = 'light'
+    #font = 'sans'
 
-    constructor() {}
+    constructor() { }
 
     init() {
         this._loadState()
-        this._modal    = new Modal()
-        this._dash     = new Dashboard({
-            onEdit:        id => this._openElementEditor(id),
-            onDelete:      id => this._deleteElement(id),
-            onToggleStar:  id => this._toggleStar(id)
+        this._modal = new Modal()
+        this._dash = new Dashboard({
+            onEdit: id => this._openElementEditor(id),
+            onDelete: id => this._deleteElement(id),
+            onToggleStar: id => this._toggleStar(id)
         })
-        this._sbModal     = new StorybookModal(this._modal, data => this._handleSbSave(data))
-        this._elEditor    = new ElementEditor(this._modal, data => this._handleElSave(data))
-        this._schemaMgr   = new SchemaManager(this._modal, data => this._handleSchemaSave(data))
+        this._sbModal = new StorybookModal(this._modal, data => this._handleSbSave(data))
+        this._elEditor = new ElementEditor(this._modal, data => this._handleElSave(data))
+        this._schemaMgr = new SchemaManager(this._modal, data => this._handleSchemaSave(data))
         this._bindGlobalUI()
         this._render()
     }
@@ -45,10 +45,10 @@ export default class App {
         const s = Storage.load()
         if (s) {
             this.#storybooks = (s.storybooks || []).map(Storybook.fromJSON)
-            this.#elements   = (s.elements   || []).map(Element.fromJSON)
-            this.#currentId  = s.currentId || null
-            this.#theme      = s.theme  || 'light'
-            this.#font       = s.font   || 'sans'
+            this.#elements = (s.elements || []).map(Element.fromJSON)
+            this.#currentId = s.currentId || null
+            this.#theme = s.theme || 'light'
+            this.#font = s.font || 'sans'
             setLocale(s.locale || 'en')
         }
         // Web Awesome uses .wa-dark on <html> for dark mode
@@ -63,10 +63,10 @@ export default class App {
     _save() {
         Storage.save({
             storybooks: this.#storybooks.map(sb => sb.toJSON()),
-            elements:   this.#elements.map(el => el.toJSON()),
-            currentId:  this.#currentId,
-            theme:  this.#theme,
-            font:   this.#font,
+            elements: this.#elements.map(el => el.toJSON()),
+            currentId: this.#currentId,
+            theme: this.#theme,
+            font: this.#font,
             locale: getLocale()
         })
     }
@@ -117,7 +117,7 @@ export default class App {
     // ── storybook CRUD ─────────────────────────────────────────────────────
     _handleSbSave(data) {
         if (data._delete) {
-            this.#elements   = this.#elements.filter(e => e.storybookId !== data.id)
+            this.#elements = this.#elements.filter(e => e.storybookId !== data.id)
             this.#storybooks = this.#storybooks.filter(sb => sb.id !== data.id)
             if (this.#currentId === data.id)
                 this.#currentId = this.#storybooks[0]?.id || null
@@ -137,7 +137,7 @@ export default class App {
         const sb = this._currentSb
         if (!sb) return
         // Apply updated types and groups back onto the live storybook object.
-        sb.elementTypes  = types.map(t => {
+        sb.elementTypes = types.map(t => {
             const existing = sb.elementTypes.find(e => e.id === t.id)
             if (existing) { Object.assign(existing, t); return existing }
             return sb.addElementType(t)
@@ -153,9 +153,9 @@ export default class App {
     }
 
     _selectStorybook(id) {
-        this.#currentId  = id
+        this.#currentId = id
         this.#filterType = null
-        this.#search     = ''
+        this.#search = ''
         document.getElementById('search-input').value = ''
         this._save()
         this._render()
@@ -163,8 +163,8 @@ export default class App {
 
     // ── element CRUD ───────────────────────────────────────────────────────
     _openElementEditor(elementId = null) {
-        const el  = elementId ? this.#elements.find(e => e.id === elementId) : null
-        const sb  = this._currentSb
+        const el = elementId ? this.#elements.find(e => e.id === elementId) : null
+        const sb = this._currentSb
         if (!sb) return
         const others = this._sbElements(sb.id).filter(e => e.id !== elementId)
         this._elEditor.open(el, sb, others)
@@ -236,15 +236,15 @@ export default class App {
                 this.#search = e.target.value.trim()
                 this._renderDashboard()
             }, 200))
-        // Sort buttons — wa-button click
-        ;['sort-date','sort-az','sort-imp'].forEach(id => {
-            document.getElementById(id)?.addEventListener('click', () => {
-                const btn = document.getElementById(id)
-                this.#sort = btn.dataset.sort
-                this._syncSortButtons()
-                this._renderDashboard()
+            // Sort buttons — wa-button click
+            ;['sort-date', 'sort-az', 'sort-imp'].forEach(id => {
+                document.getElementById(id)?.addEventListener('click', () => {
+                    const btn = document.getElementById(id)
+                    this.#sort = btn.dataset.sort
+                    this._syncSortButtons()
+                    this._renderDashboard()
+                })
             })
-        })
         document.getElementById('btn-manage-schema')
             ?.addEventListener('click', () => {
                 const sb = this._currentSb
@@ -257,7 +257,7 @@ export default class App {
         this._renderSidebar()
         const sb = this._currentSb
         const emptyState = document.getElementById('empty-state')
-        const storyView  = document.getElementById('story-view')
+        const storyView = document.getElementById('story-view')
 
         if (!sb) {
             emptyState.classList.remove('hidden')
@@ -279,7 +279,7 @@ export default class App {
     }
 
     _syncSortButtons() {
-        ;['sort-date','sort-az','sort-imp'].forEach(id => {
+        ;['sort-date', 'sort-az', 'sort-imp'].forEach(id => {
             const btn = document.getElementById(id)
             if (btn) btn.classList.toggle('sort-active', btn.dataset.sort === this.#sort)
         })
@@ -327,10 +327,12 @@ export default class App {
 
     _colorVal(colorId) {
         // Inline colour lookup to avoid async in render path
-        const map = { rose:'#f43f5e',pink:'#ec4899',fuchsia:'#d946ef',violet:'#8b5cf6',
-            indigo:'#6366f1',blue:'#3b82f6',sky:'#0ea5e9',cyan:'#06b6d4',teal:'#14b8a6',
-            green:'#22c55e',lime:'#84cc16',yellow:'#eab308',orange:'#f97316',red:'#ef4444',
-            stone:'#a8a29e',slate:'#94a3b8' }
+        const map = {
+            rose: '#f43f5e', pink: '#ec4899', fuchsia: '#d946ef', violet: '#8b5cf6',
+            indigo: '#6366f1', blue: '#3b82f6', sky: '#0ea5e9', cyan: '#06b6d4', teal: '#14b8a6',
+            green: '#22c55e', lime: '#84cc16', yellow: '#eab308', orange: '#f97316', red: '#ef4444',
+            stone: '#a8a29e', slate: '#94a3b8'
+        }
         return map[colorId] || '#6366f1'
     }
 

@@ -1,0 +1,56 @@
+/* ── Segment control (capsule switcher) ──────────────────────
+   Shared by: description Edit/Preview, Card display options, Icon picker tabs.
+   Container = .seg-ctrl, each option = .seg-btn. */
+.seg-ctrl {
+    display: inline-flex;
+    position: relative;
+    background: var(--wa-color-surface-lowered);
+    border: 1px solid var(--wa-color-surface-border);
+    border-radius: var(--radius-pill);
+    padding: 2px;
+    gap: 0;
+}
+
+/* Sliding active indicator — positioned by JS via --seg-x/--seg-w */
+.seg-ctrl::after {
+    content: '';
+    position: absolute;
+    top: 2px; bottom: 2px;
+    left: var(--seg-x, 2px);
+    width: var(--seg-w, 0px);
+    background: var(--wa-color-surface-raised);
+    border-radius: var(--radius-pill);
+    box-shadow: var(--wa-shadow-xs);
+    transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Suppress transition during initial placement */
+.seg-ctrl[style*="--seg-no-transition"]::after {
+    transition: none;
+}
+
+.seg-btn {
+    padding: 2px 12px; font-size: 12px; font-weight: 500;
+    border-radius: var(--radius-pill);
+    background: none; border: none; cursor: pointer;
+    color: var(--wa-color-text-quiet);
+    transition: color 0.15s ease;
+    line-height: 1.6;
+    white-space: nowrap;
+    display: inline-flex; align-items: center;
+    position: relative; z-index: 1;
+}
+
+.seg-btn.active {
+    background: none;
+    color: var(--wa-color-text-normal);
+    box-shadow: none;
+}
+
+/* Legacy aliases — keep for backward compatibility */
+.desc-tabs { /* alias of .seg-ctrl */ }
+.desc-tab { /* alias of .seg-btn */ }
+.desc-tab.active { /* alias of .seg-btn.active */ }

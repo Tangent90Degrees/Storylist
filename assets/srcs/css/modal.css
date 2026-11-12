@@ -1,0 +1,67 @@
+/* ── Modal ───────────────────────────────────────────────── */
+
+.modal-overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: var(--wa-color-overlay-modal);
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--wa-space-l);
+    animation: fadeIn 0.15s ease;
+}
+
+#modal-container {
+    width: 100%;
+    max-width: 960px;
+    max-height: calc(100vh - 80px);
+}
+
+.modal-inner {
+    width: 100%; max-width: 560px; margin-inline: auto;
+    background: var(--wa-color-surface-default);
+    border: 1px solid var(--wa-color-surface-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--wa-shadow-l);
+    overflow: hidden;
+    animation: slideUp 0.2s ease;
+}
+
+.modal-inner.modal-wide {
+    max-width: 960px;
+    display: flex;
+    flex-direction: column;
+    /* Don't force max-height here — let the overlay padding constrain it */
+    max-height: calc(100vh - 80px);
+}
+
+.modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: var(--wa-space-m) var(--wa-space-l);
+    border-bottom: 1px solid var(--wa-color-surface-border);
+    flex-shrink: 0;
+}
+
+.modal-title { font-size: 1.05rem; font-weight: 700; }
+
+.modal-body {
+    padding: var(--wa-space-l);
+    overflow-y: auto;
+}
+
+/* Wide modal (editor, schema): body takes remaining height and scrolls */
+.modal-inner.modal-wide .modal-body {
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding-bottom: var(--wa-space-xl, 48px);
+}
+
+/* Wide modal body contains the editor-body flex row */
+.modal-inner.modal-wide .modal-body > .editor-body {
+    flex: 1; min-height: 0;
+}
+
+.modal-footer {
+    display: flex; align-items: center; gap: var(--wa-space-xs);
+    padding: var(--wa-space-s) var(--wa-space-l);
+    border-top: 1px solid var(--wa-color-surface-border);
+    flex-shrink: 0;
+}
+
+.spacer { flex: 1; }

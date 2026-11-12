@@ -20,7 +20,7 @@ export default class ElementEditor {
     // Apply current _descMode to the textarea / preview elements
     _applyDescMode(root) {
         const textarea = root.querySelector('#el-desc')
-        const preview  = root.querySelector('#el-desc-preview')
+        const preview = root.querySelector('#el-desc-preview')
         if (!textarea || !preview) return
         root.querySelectorAll('.desc-tab')
             .forEach(b => b.classList.toggle('active', b.dataset.tab === this._descMode))
@@ -48,14 +48,14 @@ export default class ElementEditor {
             starred: false, properties: {}, relationships: []
         }
 
-        this._tags         = [...(el.tags || [])]
+        this._tags = [...(el.tags || [])]
         this._relationships = (el.relationships || []).map(r => ({ ...r }))
-        this._groupIds     = [...(el.groupIds || [])]
-        this._colorPicker  = new ColorPicker(el.color)
-        this._iconPicker   = new IconPicker(el.icon)
+        this._groupIds = [...(el.groupIds || [])]
+        this._colorPicker = new ColorPicker(el.color)
+        this._iconPicker = new IconPicker(el.icon)
         this._selectedTypeId = el.typeId
-        this._properties   = { ...(el.properties || {}) }
-        this._elData       = el   // stored for _applyValues
+        this._properties = { ...(el.properties || {}) }
+        this._elData = el   // stored for _applyValues
 
         this.modal.open(this._buildHtml(el, isEdit))
         this._bind(isEdit ? element.id : null, isEdit)
@@ -127,9 +127,9 @@ export default class ElementEditor {
                             placeholder="Markdown supported…">${this._esc(el.description)}</textarea>
                         <div id="el-desc-preview" class="markdown-preview hidden"></div>
                     </div>
+                    <div class="editor-scroll-pad"></div>
                 </div>
             </div>
-            <div style="height:var(--wa-space-xl,48px);flex-shrink:0"></div>
             <footer class="modal-footer">
                 ${isEdit ? `<wa-button id="el-delete" variant="danger" appearance="outlined">
                     <wa-icon name="trash" slot="prefix"></wa-icon>${t('delete')}
@@ -146,7 +146,7 @@ export default class ElementEditor {
 
     _renderPropsGroup(props) {
         return props.map(pd => {
-            const val   = this._properties[pd.id]
+            const val = this._properties[pd.id]
             const label = t(pd.nameKey) || pd.name
             if (pd.type === 'text') {
                 return `<div class="prop-field">
@@ -191,7 +191,7 @@ export default class ElementEditor {
         const section = this.modal.container.querySelector('#el-props-section')
         if (!section) return
 
-        const type      = this._storybook.getType(this._selectedTypeId)
+        const type = this._storybook.getType(this._selectedTypeId)
         const typeProps = type?.properties || []
 
         // Active groups in order, each with their properties
@@ -199,7 +199,7 @@ export default class ElementEditor {
             .map(gid => this._storybook.getGroup(gid))
             .filter(Boolean)
 
-        const hasTypeProps  = typeProps.length > 0
+        const hasTypeProps = typeProps.length > 0
         const hasGroupProps = activeGroups.some(g => g.properties?.length > 0)
 
         // Available groups not yet added to this element
@@ -274,7 +274,7 @@ export default class ElementEditor {
 
         // Add-group toggle + menu
         const toggle = section.querySelector('#props-add-group-toggle')
-        const menu   = section.querySelector('#props-add-group-menu')
+        const menu = section.querySelector('#props-add-group-menu')
         if (toggle && menu) {
             toggle.addEventListener('click', () => menu.classList.toggle('hidden'))
             menu.querySelectorAll('[data-add-group]').forEach(btn => {
@@ -295,8 +295,8 @@ export default class ElementEditor {
                 })
             } else if (el.tagName === 'BUTTON') {
                 el.addEventListener('click', () => {
-                    const prop    = el.dataset.prop
-                    const opt     = el.dataset.opt
+                    const prop = el.dataset.prop
+                    const opt = el.dataset.opt
                     const isMulti = el.dataset.multi === 'true'
                     if (isMulti) {
                         let arr = Array.isArray(this._properties[prop])
@@ -367,8 +367,8 @@ export default class ElementEditor {
 
         list.innerHTML = this._relationships.map(rel => {
             const target = availableElements.find(e => e.id === rel.targetId)
-            const tc   = target ? getColorValue(target.color) : null
-            const tct  = target ? getColorDarker(target.color) : null
+            const tc = target ? getColorValue(target.color) : null
+            const tct = target ? getColorDarker(target.color) : null
             const tctl = target ? getColorLighter(target.color) : null
             const targetBtn = target
                 ? `<button type="button" class="rel-target-btn" data-role="rel-target-trigger" data-rel="${rel.id}"
@@ -450,7 +450,7 @@ export default class ElementEditor {
         // Close any open picker
         document.querySelector('.rel-target-picker')?.remove()
 
-        const rel      = this._relationships.find(r => r.id === relId)
+        const rel = this._relationships.find(r => r.id === relId)
         if (!rel) return
 
         const available = (this._allElements || []).filter(e => e.id !== this._elData?.id)
@@ -468,8 +468,8 @@ export default class ElementEditor {
                 </div>
                 <div class="rel-picker-list">
                     ${filtered.length ? filtered.map(e => {
-                        const c = getColorValue(e.color)
-                        return `<button type="button" class="rel-picker-item ${rel.targetId === e.id ? 'selected' : ''}"
+                const c = getColorValue(e.color)
+                return `<button type="button" class="rel-picker-item ${rel.targetId === e.id ? 'selected' : ''}"
                             data-el-id="${e.id}">
                             <span class="rel-picker-icon" style="background:${c}">
                                 <wa-icon name="${e.icon}"></wa-icon>
@@ -477,7 +477,7 @@ export default class ElementEditor {
                             <span class="rel-picker-name">${e.name}</span>
                             ${rel.targetId === e.id ? '<wa-icon name="check" style="margin-left:auto;font-size:0.85em"></wa-icon>' : ''}
                         </button>`
-                    }).join('') : `<p class="empty-hint" style="padding:8px 12px">${t('noElements')}</p>`}
+            }).join('') : `<p class="empty-hint" style="padding:8px 12px">${t('noElements')}</p>`}
                 </div>`
 
             panel.querySelector('.rel-picker-input')?.addEventListener('input', e => {
@@ -500,9 +500,9 @@ export default class ElementEditor {
         // Position below the button
         const rect = btn.getBoundingClientRect()
         panel.style.position = 'fixed'
-        panel.style.zIndex   = '9999'
-        panel.style.top      = (rect.bottom + 4) + 'px'
-        panel.style.left     = rect.left + 'px'
+        panel.style.zIndex = '9999'
+        panel.style.top = (rect.bottom + 4) + 'px'
+        panel.style.left = rect.left + 'px'
 
         const close = e => {
             if (!panel.contains(e.target) && e.target !== btn) {
@@ -516,7 +516,7 @@ export default class ElementEditor {
 
     _bindRelDragSort(container) {
         const itemSel = '.rel-item'
-        const idAttr  = 'data-rel-id'
+        const idAttr = 'data-rel-id'
         let dragEl = null, dragId = null, currentOverId = null
 
         const blankImg = new Image()
@@ -537,10 +537,10 @@ export default class ElementEditor {
                 const delta = oldTop - el.getBoundingClientRect().top
                 if (Math.abs(delta) < 1) return
                 el.style.transition = 'none'
-                el.style.transform  = `translateY(${delta}px)`
+                el.style.transform = `translateY(${delta}px)`
                 requestAnimationFrame(() => {
                     el.style.transition = 'transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-                    el.style.transform  = ''
+                    el.style.transform = ''
                 })
             })
         }
@@ -638,12 +638,12 @@ export default class ElementEditor {
                 name,
                 description: this._val('#el-desc'),
                 typeId: this._selectedTypeId,
-                color:  this._colorPicker.selected,
-                icon:   this._iconPicker.selected,
+                color: this._colorPicker.selected,
+                icon: this._iconPicker.selected,
                 starred: this._elData.starred ?? false,
-                tags:          this._tags,
-                groupIds:      this._groupIds,
-                properties:    this._properties,
+                tags: this._tags,
+                groupIds: this._groupIds,
+                properties: this._properties,
                 relationships: this._relationships
             })
             this.modal.close()
