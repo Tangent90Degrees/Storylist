@@ -111,6 +111,11 @@ export default class ElementEditor {
             const isBold      = document.queryCommandState('bold')
             const isUnderline = document.queryCommandState('underline')
             const isUL        = document.queryCommandState('insertUnorderedList')
+            const isOL        = document.queryCommandState('insertOrderedList')
+            const alignLeft   = document.queryCommandState('justifyLeft')
+            const alignCenter = document.queryCommandState('justifyCenter')
+            const alignRight  = document.queryCommandState('justifyRight')
+            const alignFull   = document.queryCommandState('justifyFull')
             const blockTag    = this._cursorBlockTag()
             // Detect <code> by walking the cursor node up
             let codeNode = window.getSelection()?.anchorNode
@@ -125,6 +130,17 @@ export default class ElementEditor {
                 ?.classList.toggle('active', isCode)
             root.querySelector('[data-format="ul"]')
                 ?.classList.toggle('active', isUL)
+            root.querySelector('[data-format="ol"]')
+                ?.classList.toggle('active', isOL)
+            // Alignment: only one can be active at a time
+            root.querySelector('[data-format="alignLeft"]')
+                ?.classList.toggle('active', alignLeft && !alignFull)
+            root.querySelector('[data-format="alignCenter"]')
+                ?.classList.toggle('active', alignCenter)
+            root.querySelector('[data-format="alignRight"]')
+                ?.classList.toggle('active', alignRight)
+            root.querySelector('[data-format="alignJustify"]')
+                ?.classList.toggle('active', alignFull)
             root.querySelector('[data-format="h1"]')
                 ?.classList.toggle('active', blockTag === 'H1')
             root.querySelector('[data-format="h2"]')
@@ -155,6 +171,21 @@ export default class ElementEditor {
                 break
             case 'ul':
                 document.execCommand('insertUnorderedList', false, null)
+                break
+            case 'ol':
+                document.execCommand('insertOrderedList', false, null)
+                break
+            case 'alignLeft':
+                document.execCommand('justifyLeft', false, null)
+                break
+            case 'alignCenter':
+                document.execCommand('justifyCenter', false, null)
+                break
+            case 'alignRight':
+                document.execCommand('justifyRight', false, null)
+                break
+            case 'alignJustify':
+                document.execCommand('justifyFull', false, null)
                 break
             case 'code': {
                 // Toggle: if cursor is already inside a <code>, unwrap it; otherwise wrap selection
@@ -228,6 +259,32 @@ export default class ElementEditor {
             <div class="modal-body editor-body">
                 <div class="editor-col editor-col-side">
                     <div class="side-field">
+                        <label class="form-label">${t('avatar')}</label>
+                        <div class="avatar-upload-wrap" id="el-avatar-wrap">
+                            <div class="avatar-preview" id="el-avatar-preview">
+                                ${el.avatar
+                                    ? `<img src="${el.avatar}" class="avatar-preview-img" alt="">`
+                                    : `<wa-icon name="${el.icon}" class="avatar-preview-icon"></wa-icon>`}
+                            </div>
+                            <div class="avatar-upload-actions">
+                                <div class="avatar-btn-row">
+                                    <label class="avatar-upload-btn" for="el-avatar-input">
+                                        <wa-icon name="arrow-up-from-bracket"></wa-icon>
+                                        ${t('uploadAvatar')}
+                                    </label>
+                                    <input id="el-avatar-input" type="file" accept="image/*" style="display:none">
+                                    ${el.avatar ? `<button type="button" class="avatar-crop-btn" id="el-avatar-crop" title="${t('cropAvatar')}">
+                                        <wa-icon name="crop-simple"></wa-icon>
+                                        ${t('cropAvatar')}
+                                    </button>` : ''}
+                                </div>
+                                ${el.avatar ? `<button type="button" class="avatar-remove-btn" id="el-avatar-remove">
+                                    <wa-icon name="xmark"></wa-icon>${t('removeAvatar')}
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="side-field">
                         <label class="form-label" for="el-type">${t('type')}</label>
                         <select id="el-type" class="form-control">${typeOptions}</select>
                     </div>
@@ -242,26 +299,6 @@ export default class ElementEditor {
                         <label class="form-label" for="el-name">${t('name')}</label>
                         <input id="el-name" type="text" class="form-control form-control-lg"
                             value="${this._esc(el.name)}" placeholder="${t('name')}">
-                    </div>
-                    <div class="editor-field">
-                        <label class="form-label">${t('avatar')}</label>
-                        <div class="avatar-upload-wrap" id="el-avatar-wrap">
-                            <div class="avatar-preview" id="el-avatar-preview">
-                                ${el.avatar
-                                    ? `<img src="${el.avatar}" class="avatar-preview-img" alt="">`
-                                    : `<wa-icon name="${el.icon}" class="avatar-preview-icon"></wa-icon>`}
-                            </div>
-                            <div class="avatar-upload-actions">
-                                <label class="avatar-upload-btn" for="el-avatar-input">
-                                    <wa-icon name="arrow-up-from-bracket"></wa-icon>
-                                    ${t('uploadAvatar')}
-                                </label>
-                                <input id="el-avatar-input" type="file" accept="image/*" style="display:none">
-                                ${el.avatar ? `<button type="button" class="avatar-remove-btn" id="el-avatar-remove">
-                                    <wa-icon name="xmark"></wa-icon>${t('removeAvatar')}
-                                </button>` : ''}
-                            </div>
-                        </div>
                     </div>
                     <div class="editor-field">
                         <label class="form-label">${t('color')}</label>
@@ -292,6 +329,12 @@ export default class ElementEditor {
                             <button type="button" class="desc-tool" data-format="code" title="${t('codeBlock')}"><wa-icon name="code"></wa-icon></button>
                             <div class="desc-toolbar-sep"></div>
                             <button type="button" class="desc-tool" data-format="ul" title="${t('bulletList')}"><wa-icon name="list-ul"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="ol" title="${t('numberedList')}"><wa-icon name="list-ol"></wa-icon></button>
+                            <div class="desc-toolbar-sep"></div>
+                            <button type="button" class="desc-tool" data-format="alignLeft" title="${t('alignLeft')}"><wa-icon name="align-left"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="alignCenter" title="${t('alignCenter')}"><wa-icon name="align-center"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="alignRight" title="${t('alignRight')}"><wa-icon name="align-right"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="alignJustify" title="${t('alignJustify')}"><wa-icon name="align-justify"></wa-icon></button>
                         </div>
                         <div id="el-desc" class="rich-editor" contenteditable="true"
                             data-placeholder="${t('descriptionPlaceholder')}"></div>
@@ -338,12 +381,14 @@ export default class ElementEditor {
                 const selected = pd.type === 'multi-enum' ? (Array.isArray(val) ? val : []) : null
                 const opts = pd.options.map(o => {
                     const isSelected = pd.type === 'enum' ? val === o.id : selected.includes(o.id)
-                    const c = getColorValue(o.color)
+                    const c   = getColorValue(o.color)
+                    const cdk = getColorDarker(o.color)
+                    const clt = getColorLighter(o.color)
                     const iconHtml = o.icon ? `<wa-icon name="${o.icon}" class="chip-icon"></wa-icon>` : ''
                     return `<button type="button"
                         class="enum-opt ${isSelected ? 'selected' : ''}"
                         data-prop="${pd.id}" data-opt="${o.id}"
-                        style="--opt-c:${c}"
+                        style="--opt-c:${c};--opt-text:${cdk};--opt-text-dark:${clt}"
                         ${pd.type === 'multi-enum' ? 'data-multi="true"' : ''}>
                         ${iconHtml}${t(o.labelKey) || o.label}</button>`
                 }).join('')
@@ -766,12 +811,54 @@ export default class ElementEditor {
         // Avatar upload
         const avatarInput = root.querySelector('#el-avatar-input')
         const avatarPreview = root.querySelector('#el-avatar-preview')
+        const _refreshAvatarButtons = () => {
+            const actions = root.querySelector('.avatar-upload-actions')
+            if (!actions) return
+            // Rebuild the button row
+            const existingRow = actions.querySelector('.avatar-btn-row')
+            if (existingRow) existingRow.remove()
+            const existingRemove = actions.querySelector('#el-avatar-remove')
+            if (existingRemove) existingRemove.remove()
+
+            const row = document.createElement('div')
+            row.className = 'avatar-btn-row'
+
+            // Upload button (always present)
+            const uploadLabel = document.createElement('label')
+            uploadLabel.className = 'avatar-upload-btn'
+            uploadLabel.htmlFor = 'el-avatar-input'
+            uploadLabel.innerHTML = `<wa-icon name="arrow-up-from-bracket"></wa-icon>${t('uploadAvatar')}`
+            row.appendChild(uploadLabel)
+
+            // Crop button (only if avatar exists)
+            if (this._avatar) {
+                const cropBtn = document.createElement('button')
+                cropBtn.type = 'button'
+                cropBtn.className = 'avatar-crop-btn'
+                cropBtn.id = 'el-avatar-crop'
+                cropBtn.title = t('cropAvatar')
+                cropBtn.innerHTML = `<wa-icon name="crop-simple"></wa-icon>${t('cropAvatar')}`
+                cropBtn.addEventListener('click', () => this._openCropEditor(root))
+                row.appendChild(cropBtn)
+            }
+            actions.insertBefore(row, actions.firstChild)
+
+            // Remove button (only if avatar exists)
+            if (this._avatar) {
+                const removeBtn = document.createElement('button')
+                removeBtn.type = 'button'
+                removeBtn.className = 'avatar-remove-btn'
+                removeBtn.id = 'el-avatar-remove'
+                removeBtn.innerHTML = `<wa-icon name="xmark"></wa-icon>${t('removeAvatar')}`
+                removeBtn.addEventListener('click', () => _removeAvatar())
+                actions.appendChild(removeBtn)
+            }
+        }
         const _removeAvatar = () => {
             this._avatar = null
             const icon = this._iconPicker?.selected || 'circle'
             avatarPreview.innerHTML = `<wa-icon name="${icon}" class="avatar-preview-icon"></wa-icon>`
-            const removeBtn = root.querySelector('#el-avatar-remove')
-            if (removeBtn) removeBtn.remove()
+            _refreshAvatarButtons()
             if (avatarInput) avatarInput.value = ''
         }
         if (avatarInput) {
@@ -782,21 +869,13 @@ export default class ElementEditor {
                 reader.onload = ev => {
                     this._avatar = ev.target.result
                     avatarPreview.innerHTML = `<img src="${this._avatar}" class="avatar-preview-img" alt="">`
-                    const wrap = root.querySelector('#el-avatar-wrap')
-                    if (wrap && !wrap.querySelector('#el-avatar-remove')) {
-                        const removeBtn = document.createElement('button')
-                        removeBtn.type = 'button'
-                        removeBtn.className = 'avatar-remove-btn'
-                        removeBtn.id = 'el-avatar-remove'
-                        removeBtn.innerHTML = `<wa-icon name="xmark"></wa-icon>${t('removeAvatar')}`
-                        wrap.querySelector('.avatar-upload-actions').appendChild(removeBtn)
-                        removeBtn.addEventListener('click', () => _removeAvatar())
-                    }
+                    _refreshAvatarButtons()
                 }
                 reader.readAsDataURL(file)
             })
         }
-        root.querySelector('#el-avatar-remove')?.addEventListener('click', () => _removeAvatar())
+        // Bind crop button on initial render
+        root.querySelector('#el-avatar-crop')?.addEventListener('click', () => this._openCropEditor(root))
 
         root.querySelectorAll('[data-modal-close]').forEach(btn =>
             btn.addEventListener('click', () => this.modal.close()))
@@ -855,14 +934,16 @@ export default class ElementEditor {
                 { format: 'code',      icon: 'code' },
                 { type: 'sep' },
                 { format: 'ul',        icon: 'list-ul' },
+                { format: 'ol',        icon: 'list-ol' },
             ]
 
             // Detect current active states using the same logic as _updateToolbarState
-            let isBold = false, isUnderline = false, isUL = false, isCode = false, blockTag = null
+            let isBold = false, isUnderline = false, isUL = false, isOL = false, isCode = false, blockTag = null
             try {
                 isBold      = document.queryCommandState('bold')
                 isUnderline = document.queryCommandState('underline')
                 isUL        = document.queryCommandState('insertUnorderedList')
+                isOL        = document.queryCommandState('insertOrderedList')
                 blockTag    = this._cursorBlockTag()
                 let codeCheck = window.getSelection()?.anchorNode
                 if (codeCheck?.nodeType === Node.TEXT_NODE) codeCheck = codeCheck.parentElement
@@ -873,6 +954,7 @@ export default class ElementEditor {
                 if (fmt === 'bold')      return isBold
                 if (fmt === 'underline') return isUnderline
                 if (fmt === 'ul')        return isUL
+                if (fmt === 'ol')        return isOL
                 if (fmt === 'code')      return isCode
                 if (fmt === 'h1')        return blockTag === 'H1'
                 if (fmt === 'h2')        return blockTag === 'H2'
@@ -1003,6 +1085,144 @@ export default class ElementEditor {
         this._renderProps()
         this._renderTags()
         this._renderRelationships()
+    }
+
+    // Open an inline crop editor for the current avatar image.
+    // Renders a drag-to-reposition + scroll-to-zoom crop UI directly in the
+    // avatar upload area. Closing it commits the cropped data URL.
+    _openCropEditor(root) {
+        if (!this._avatar) return
+
+        // Overlay the entire modal-body so the crop editor has room
+        const overlay = document.createElement('div')
+        overlay.className = 'avatar-crop-overlay'
+
+        const SIZE = 200  // output square size in px
+        // State
+        let imgNaturalW = 0, imgNaturalH = 0
+        let scale = 1       // zoom factor (img pixels per canvas pixel)
+        let offsetX = 0     // px offset of image top-left inside crop canvas
+        let offsetY = 0
+        let isDragging = false
+        let dragStartX = 0, dragStartY = 0
+        let dragOffsetX = 0, dragOffsetY = 0
+
+        overlay.innerHTML = `
+            <div class="avatar-crop-panel">
+                <div class="avatar-crop-header">
+                    <span class="avatar-crop-title">${t('cropAvatar')}</span>
+                </div>
+                <div class="avatar-crop-workspace">
+                    <canvas id="avatar-crop-canvas" width="${SIZE}" height="${SIZE}"
+                        class="avatar-crop-canvas"></canvas>
+                </div>
+                <div class="avatar-crop-hint">${t('cropHint')}</div>
+                <div class="avatar-crop-footer">
+                    <button type="button" class="avatar-crop-cancel">${t('cancel')}</button>
+                    <button type="button" class="avatar-crop-apply">${t('save')}</button>
+                </div>
+            </div>`
+
+        document.body.appendChild(overlay)
+        const canvas = overlay.querySelector('#avatar-crop-canvas')
+        const ctx = canvas.getContext('2d')
+        const img = new Image()
+
+        const draw = () => {
+            ctx.clearRect(0, 0, SIZE, SIZE)
+            ctx.drawImage(img, offsetX, offsetY, img.naturalWidth * scale, img.naturalHeight * scale)
+            // Circular clip guide
+            ctx.save()
+            ctx.strokeStyle = 'rgba(255,255,255,0.7)'
+            ctx.lineWidth = 1.5
+            ctx.beginPath()
+            ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 2, 0, Math.PI * 2)
+            ctx.stroke()
+            ctx.restore()
+        }
+
+        const clamp = () => {
+            const iw = img.naturalWidth * scale
+            const ih = img.naturalHeight * scale
+            // Keep at least some image visible in each direction
+            offsetX = Math.min(0, Math.max(SIZE - iw, offsetX))
+            offsetY = Math.min(0, Math.max(SIZE - ih, offsetY))
+        }
+
+        img.onload = () => {
+            // Initial fit: cover the square
+            const scaleX = SIZE / img.naturalWidth
+            const scaleY = SIZE / img.naturalHeight
+            scale = Math.max(scaleX, scaleY)
+            // Center
+            offsetX = (SIZE - img.naturalWidth * scale) / 2
+            offsetY = (SIZE - img.naturalHeight * scale) / 2
+            draw()
+        }
+        img.src = this._avatar
+
+        // Drag to pan
+        canvas.addEventListener('mousedown', e => {
+            isDragging = true
+            dragStartX = e.clientX
+            dragStartY = e.clientY
+            dragOffsetX = offsetX
+            dragOffsetY = offsetY
+            canvas.style.cursor = 'grabbing'
+            e.preventDefault()
+        })
+        window.addEventListener('mousemove', e => {
+            if (!isDragging) return
+            offsetX = dragOffsetX + (e.clientX - dragStartX)
+            offsetY = dragOffsetY + (e.clientY - dragStartY)
+            clamp(); draw()
+        })
+        window.addEventListener('mouseup', () => {
+            isDragging = false
+            canvas.style.cursor = 'grab'
+        })
+
+        // Touch drag
+        canvas.addEventListener('touchstart', e => {
+            const t0 = e.touches[0]
+            isDragging = true
+            dragStartX = t0.clientX; dragStartY = t0.clientY
+            dragOffsetX = offsetX;   dragOffsetY = offsetY
+            e.preventDefault()
+        }, { passive: false })
+        canvas.addEventListener('touchmove', e => {
+            if (!isDragging) return
+            const t0 = e.touches[0]
+            offsetX = dragOffsetX + (t0.clientX - dragStartX)
+            offsetY = dragOffsetY + (t0.clientY - dragStartY)
+            clamp(); draw(); e.preventDefault()
+        }, { passive: false })
+        canvas.addEventListener('touchend', () => { isDragging = false })
+
+        // Scroll / pinch to zoom
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault()
+            const factor = e.deltaY < 0 ? 1.08 : 0.93
+            const prevScale = scale
+            scale = Math.max(SIZE / Math.max(img.naturalWidth, img.naturalHeight), scale * factor)
+            // Zoom toward cursor
+            const rect = canvas.getBoundingClientRect()
+            const cx = e.clientX - rect.left
+            const cy = e.clientY - rect.top
+            offsetX = cx - (cx - offsetX) * (scale / prevScale)
+            offsetY = cy - (cy - offsetY) * (scale / prevScale)
+            clamp(); draw()
+        }, { passive: false })
+
+        // Buttons
+        overlay.querySelector('.avatar-crop-cancel').addEventListener('click', () => overlay.remove())
+        overlay.querySelector('.avatar-crop-apply').addEventListener('click', () => {
+            this._avatar = canvas.toDataURL('image/jpeg', 0.92)
+            root.querySelector('#el-avatar-preview').innerHTML =
+                `<img src="${this._avatar}" class="avatar-preview-img" alt="">`
+            overlay.remove()
+        })
+        overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove() })
     }
 
     _esc(str) {

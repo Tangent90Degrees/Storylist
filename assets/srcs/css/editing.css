@@ -366,8 +366,12 @@ select.form-control {
     padding      : 3px 4px;
     background   : var(--wa-color-surface-lowered);
     border       : 1px solid var(--wa-color-surface-border);
-    border-bottom: none;
     border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.desc-toolbar + .rich-editor {
+    border-top   : none;
+    border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .desc-toolbar + .form-textarea {
@@ -657,8 +661,40 @@ select.form-control {
 .avatar-upload-actions {
     display       : flex;
     flex-direction: column;
-    gap           : var(--wa-space-xs);
+    gap           : 4px;
     align-items   : flex-start;
+}
+
+.avatar-btn-row {
+    display    : flex;
+    align-items: center;
+    gap        : 6px;
+    flex-wrap  : wrap;
+}
+
+.avatar-crop-btn {
+    display        : inline-flex;
+    align-items    : center;
+    gap            : 6px;
+    padding        : 0 10px;
+    height         : var(--ctrl-h-sm, 28px);
+    border-radius  : var(--radius);
+    border         : 1px solid var(--wa-color-surface-border);
+    background     : var(--wa-color-surface-raised);
+    color          : var(--wa-color-text-normal);
+    font-size      : 12px;
+    font-weight    : 500;
+    font-family    : inherit;
+    cursor         : pointer;
+    transition     : background var(--wa-transition-fast);
+}
+
+.avatar-crop-btn:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+}
+
+.avatar-crop-btn wa-icon {
+    font-size: 0.85em;
 }
 
 .avatar-upload-btn {
@@ -703,6 +739,101 @@ select.form-control {
 .avatar-remove-btn:hover { opacity: 1; }
 
 .avatar-remove-btn wa-icon { font-size: 0.85em; }
+
+/* ── Avatar crop overlay ─────────────────────────────────── */
+.avatar-crop-overlay {
+    position         : fixed;
+    inset             : 0;
+    z-index           : 10001;
+    background        : var(--wa-color-overlay-modal);
+    display           : flex;
+    align-items       : center;
+    justify-content   : center;
+    backdrop-filter   : blur(2px);
+}
+
+.avatar-crop-panel {
+    background        : var(--wa-color-surface-default);
+    border            : 1px solid var(--wa-color-surface-border);
+    border-radius     : var(--radius-lg);
+    box-shadow        : var(--wa-shadow-l);
+    padding           : var(--wa-space-m);
+    display           : flex;
+    flex-direction    : column;
+    gap               : var(--wa-space-m);
+    max-width         : 320px;
+}
+
+.avatar-crop-header {
+    display     : flex;
+    align-items : center;
+    justify-content: space-between;
+}
+
+.avatar-crop-title {
+    font-size  : 14px;
+    font-weight: 600;
+    color      : var(--wa-color-text-normal);
+}
+
+.avatar-crop-workspace {
+    display           : flex;
+    justify-content   : center;
+}
+
+.avatar-crop-canvas {
+    width             : 200px;
+    height            : 200px;
+    border-radius     : 50%;
+    cursor            : grab;
+    touch-action      : none;
+    background        : var(--wa-color-surface-lowered);
+    border            : 2px solid var(--wa-color-surface-border);
+}
+
+.avatar-crop-canvas:active {
+    cursor: grabbing;
+}
+
+.avatar-crop-hint {
+    font-size : 11px;
+    color     : var(--wa-color-text-quiet);
+    text-align: center;
+}
+
+.avatar-crop-footer {
+    display       : flex;
+    justify-content: flex-end;
+    gap           : var(--wa-space-xs);
+}
+
+.avatar-crop-cancel,
+.avatar-crop-apply {
+    display      : inline-flex;
+    align-items  : center;
+    padding      : 0 16px;
+    height       : var(--ctrl-h, 32px);
+    border-radius: var(--radius);
+    font-size    : 13px;
+    font-weight  : 500;
+    font-family  : inherit;
+    cursor       : pointer;
+    border       : 1px solid var(--wa-color-surface-border);
+    transition   : background var(--wa-transition-fast);
+}
+
+.avatar-crop-cancel {
+    background: transparent;
+    color     : var(--wa-color-text-normal);
+}
+.avatar-crop-cancel:hover { background: var(--wa-color-neutral-fill-quiet); }
+
+.avatar-crop-apply {
+    background  : var(--wa-color-brand-50);
+    border-color: var(--wa-color-brand-50);
+    color       : #fff;
+}
+.avatar-crop-apply:hover { background: var(--wa-color-brand-40); }
 
 /* ── 14. Color palette ───────────────────────────────────── */
 .color-palette {
@@ -946,29 +1077,41 @@ select.form-control {
 }
 
 .enum-opt {
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 4px;
     padding      : var(--pill-pad-md);
     border-radius: var(--radius-pill);
     font-size    : var(--pill-font-md);
     font-weight  : 500;
-    cursor       : pointer;
-    background   : none;
-    color        : var(--wa-color-text-quiet);
-    border       : 1.5px solid var(--wa-color-surface-border);
-    transition   : all var(--wa-transition-fast);
+    line-height  : 1.4;
     min-height   : var(--pill-h-md);
-    display      : inline-flex;
-    align-items  : center;
-    gap          : 3px;
+    cursor       : pointer;
+    white-space  : nowrap;
+    border       : 1px solid transparent;
+    /* Unselected: neutral chip look matching card badges */
+    background   : var(--wa-color-neutral-fill-quiet);
+    color        : var(--wa-color-text-quiet);
+    transition   : background var(--wa-transition-fast), color var(--wa-transition-fast),
+                   border-color var(--wa-transition-fast);
 }
 
 .enum-opt:hover {
-    border-color: var(--wa-color-neutral-border-normal);
+    background  : var(--wa-color-neutral-fill-quiet);
+    border-color: var(--wa-color-neutral-border-quiet);
+    color       : var(--wa-color-text-normal);
 }
 
+/* Selected: colored like a card badge — tinted background, darker text */
 .enum-opt.selected {
-    border-color: var(--opt-c, var(--wa-color-brand-border-normal));
     background  : color-mix(in srgb, var(--opt-c, var(--wa-color-brand-50)) 16%, transparent);
-    color       : var(--opt-c, var(--accent-text));
+    border-color: color-mix(in srgb, var(--opt-c, var(--wa-color-brand-50)) 40%, transparent);
+    color       : var(--opt-text, var(--opt-c, var(--accent-text)));
+}
+
+/* Dark mode: use the lighter text variant for legibility */
+.wa-dark .enum-opt.selected {
+    color: var(--opt-text-dark, var(--opt-text, var(--opt-c, var(--accent-text))));
 }
 
 /* ── 19. Relationships ───────────────────────────────────── */
@@ -976,7 +1119,7 @@ select.form-control {
     display       : flex;
     flex-direction: column;
     gap           : var(--wa-space-xs);
-    margin-bottom : var(--wa-space-s);
+    margin-bottom : var(--wa-space-xs);
 }
 
 .rel-item {
