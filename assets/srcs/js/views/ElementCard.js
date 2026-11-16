@@ -5,11 +5,12 @@ import { stripMarkdown, relativeTime } from '../utils/helpers.js'
 import { t } from '../utils/i18n.js'
 
 export default class ElementCard {
-    constructor(el, storybook, incomingCount, callbacks) {
+    constructor(el, storybook, incomingCount, callbacks, allElements = []) {
         this.el = el
         this.sb = storybook
         this.incomingCount = incomingCount
         this.callbacks = callbacks
+        this.allElements = allElements
     }
 
     // Build a label badge with optional icon, colored per the type/group
@@ -234,6 +235,42 @@ export default class ElementCard {
         return `<div class="card-props">${out.join('')}</div>`
     }
 
+    // Build the visible-relationships list for the card
+    _relsHtml() {
+        const visible = (this.el.relationships || []).filter(r => r.showOnCard !== false && r.targetId)
+        if (!visible.length) return ''
+
+        const items = visible.map(rel => {
+            const target = this.allElements.find(e => e.id === rel.targetId)
+            if (!target) return ''
+            const c = getColorValue(target.color)
+            // Type badge for the target element
+            const type = this.sb.getType(target.typeId)
+            const typeHtml = type
+                ? `<span class="card-rel-type-badge"
+                      style="--rel-type-c:${getColorValue(type.color)};--rel-type-text:${getColorDarker(type.color)};--rel-type-text-dark:${getColorLighter(type.color)}">
+                      <wa-icon name="${type.icon}"></wa-icon>${this._esc(t(type.nameKey) || type.name)}
+                   </span>`
+                : ''
+            const avatarContent = target.avatar
+                ? `<img src="${target.avatar}" class="card-rel-avatar-img" alt="">`
+                : `<wa-icon name="${target.icon}"></wa-icon>`
+            return `<div class="card-rel">
+                <div class="card-rel-avatar" style="background:${target.avatar ? 'transparent' : c}">
+                    ${avatarContent}
+                </div>
+                <div class="card-rel-text">
+                    <span class="card-rel-name">${this._esc(rel.label || '')}</span>
+                    <span class="card-rel-target-name">${this._esc(target.name)}</span>
+                </div>
+                ${typeHtml}
+            </div>`
+        }).filter(Boolean).join('')
+
+        if (!items) return ''
+        return `<div class="card-rels">${items}</div>`
+    }
+
     render() {
         const { el, sb } = this
         const colorVal  = getColorValue(el.color)
@@ -247,13 +284,17 @@ export default class ElementCard {
                     ><span class="badge-text">${tag}</span></span>`).join('')
             : ''
 
+        const iconContent = el.avatar
+            ? `<img src="${el.avatar}" class="card-avatar-img" alt="">`
+            : `<wa-icon name="${el.icon}"></wa-icon>`
+
         return `
         <article class="element-card" data-id="${el.id}"
             style="--el-color:${colorVal}">
             <div class="card-inner">
                 <div class="card-header">
-                    <div class="card-icon-wrap">
-                        <wa-icon name="${el.icon}"></wa-icon>
+                    <div class="card-icon-wrap${el.avatar ? ' card-icon-wrap--avatar' : ''}">
+                        ${iconContent}
                     </div>
                     <div class="card-meta">
                         <h3 class="card-name">${el.name}</h3>
@@ -267,6 +308,7 @@ export default class ElementCard {
                 </div>
                 ${desc ? `<p class="card-desc">${desc}</p>` : ''}
                 ${this._propSummary()}
+                ${this._relsHtml()}
                 ${tagHtml ? `<div class="card-tags">${tagHtml}</div>` : ''}
                 <div class="card-footer">
                     <span class="card-conn">
@@ -277,6 +319,11 @@ export default class ElementCard {
                 </div>
             </div>
         </article>`
+    }
+
+    _esc(str) {
+        return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;').replace(/>/g, '&gt;')
     }
 
     bindEvents(node) {

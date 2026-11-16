@@ -3,37 +3,184 @@
 import { t } from '../utils/i18n.js'
 import ColorPicker from './ColorPicker.js'
 import IconPicker from './IconPicker.js'
-import { uuid, segCtrlUpdateIndicator } from '../utils/helpers.js'
-import { applyPanguToElement } from '../utils/pangu.js'
+import { uuid } from '../utils/helpers.js'
 import { getColorValue, getColorDarker, getColorLighter } from '../data/colors.js'
 
 export default class ElementEditor {
     constructor(modal, onSave) {
         this.modal = modal
         this.onSave = onSave
-        this._descMode = 'write'
         this._tags = []
         this._relationships = []
         this._groupIds = []
     }
 
-    // Apply current _descMode to the textarea / preview elements
-    _applyDescMode(root) {
-        const textarea = root.querySelector('#el-desc')
-        const preview = root.querySelector('#el-desc-preview')
-        if (!textarea || !preview) return
-        root.querySelectorAll('.desc-tab')
-            .forEach(b => b.classList.toggle('active', b.dataset.tab === this._descMode))
-        if (this._descMode === 'preview') {
-            textarea.style.display = 'none'
-            preview.classList.remove('hidden')
-            preview.innerHTML = window.marked
-                ? marked.parse(textarea.value || '')
-                : `<pre>${textarea.value}</pre>`
-            applyPanguToElement(preview)
-        } else {
-            textarea.style.display = ''
-            preview.classList.add('hidden')
+    // Convert markdown to HTML for contenteditable display
+    _mdToHtml(md) {
+        if (!md) return '<p><br></p>'
+        let html = md
+        // Headers
+        html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        // Bold
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        // Underline (already HTML)
+        // Code blocks
+        html = html.replace(/```\n?([\s\S]*?)\n?```/g, '<pre><code>$1</code></pre>')
+        // Inline code
+        html = html.replace(/`(.+?)`/g, '<code>$1</code>')
+        // Bullet lists
+        const lines = html.split('\n')
+        let inList = false
+        const result = []
+        for (const line of lines) {
+            if (line.match(/^- (.+)$/)) {
+                if (!inList) {
+                    result.push('<ul>')
+                    inList = true
+                }
+                result.push('<li>' + line.replace(/^- /, '') + '</li>')
+            } else {
+                if (inList) {
+                    result.push('</ul>')
+                    inList = false
+                }
+                if (line.match(/^<(h[123]|pre)/)) {
+                    result.push(line)
+                } else if (line.trim()) {
+                    result.push('<p>' + line + '</p>')
+                }
+            }
+        }
+        if (inList) result.push('</ul>')
+        return result.join('') || '<p><br></p>'
+    }
+
+    // Convert contenteditable HTML back to markdown
+    _htmlToMd(html) {
+        if (!html) return ''
+        let md = html
+        // Clean up contenteditable artifacts
+        md = md.replace(/<div>/g, '\n').replace(/<\/div>/g, '')
+        md = md.replace(/<br\s*\/?>/g, '\n')
+        // Headers
+        md = md.replace(/<h1>(.*?)<\/h1>/g, '# $1\n')
+        md = md.replace(/<h2>(.*?)<\/h2>/g, '## $1\n')
+        md = md.replace(/<h3>(.*?)<\/h3>/g, '### $1\n')
+        // Bold
+        md = md.replace(/<strong>(.*?)<\/strong>/g, '**$1**')
+        md = md.replace(/<b>(.*?)<\/b>/g, '**$1**')
+        // Code blocks
+        md = md.replace(/<pre><code>([\s\S]*?)<\/code><\/pre>/g, '```\n$1\n```')
+        // Inline code
+        md = md.replace(/<code>(.*?)<\/code>/g, '`$1`')
+        // Lists
+        md = md.replace(/<li>(.*?)<\/li>/g, '- $1\n')
+        md = md.replace(/<\/?ul>/g, '')
+        // Paragraphs
+        md = md.replace(/<p>(.*?)<\/p>/g, '$1\n')
+        // Clean up
+        md = md.replace(/\n{3,}/g, '\n\n').trim()
+        return md
+    }
+
+    // Return the tag name of the block element containing the cursor, or null
+    _cursorBlockTag() {
+        const sel = window.getSelection()
+        if (!sel || !sel.rangeCount) return null
+        let node = sel.anchorNode
+        if (!node) return null
+        if (node.nodeType === Node.TEXT_NODE) node = node.parentElement
+        const block = node.closest('h1, h2, h3, p, li, pre, div')
+        return block ? block.tagName.toUpperCase() : null
+    }
+
+    // Update toolbar button active states to reflect current cursor/selection
+    _updateToolbarState(root) {
+        const editor = root.querySelector('#el-desc')
+        if (!editor) return
+        // Only update if selection is inside or editor is focused
+        const sel = window.getSelection()
+        if (sel && sel.rangeCount) {
+            const anchor = sel.anchorNode
+            if (anchor && !editor.contains(anchor) && document.activeElement !== editor) return
+        }
+
+        try {
+            const isBold      = document.queryCommandState('bold')
+            const isUnderline = document.queryCommandState('underline')
+            const isUL        = document.queryCommandState('insertUnorderedList')
+            const blockTag    = this._cursorBlockTag()
+            // Detect <code> by walking the cursor node up
+            let codeNode = window.getSelection()?.anchorNode
+            if (codeNode?.nodeType === Node.TEXT_NODE) codeNode = codeNode.parentElement
+            const isCode = !!codeNode?.closest('code')
+
+            root.querySelector('[data-format="bold"]')
+                ?.classList.toggle('active', isBold)
+            root.querySelector('[data-format="underline"]')
+                ?.classList.toggle('active', isUnderline)
+            root.querySelector('[data-format="code"]')
+                ?.classList.toggle('active', isCode)
+            root.querySelector('[data-format="ul"]')
+                ?.classList.toggle('active', isUL)
+            root.querySelector('[data-format="h1"]')
+                ?.classList.toggle('active', blockTag === 'H1')
+            root.querySelector('[data-format="h2"]')
+                ?.classList.toggle('active', blockTag === 'H2')
+        } catch (_) { /* queryCommandState may throw in some browsers */ }
+    }
+
+    // Apply formatting via execCommand to contenteditable
+    _applyFormat(editor, format) {
+        editor.focus()
+        switch (format) {
+            case 'h1': {
+                // Toggle: if already h1, restore to paragraph
+                const cur = this._cursorBlockTag()
+                document.execCommand('formatBlock', false, cur === 'H1' ? '<p>' : '<h1>')
+                break
+            }
+            case 'h2': {
+                const cur = this._cursorBlockTag()
+                document.execCommand('formatBlock', false, cur === 'H2' ? '<p>' : '<h2>')
+                break
+            }
+            case 'bold':
+                document.execCommand('bold', false, null)
+                break
+            case 'underline':
+                document.execCommand('underline', false, null)
+                break
+            case 'ul':
+                document.execCommand('insertUnorderedList', false, null)
+                break
+            case 'code': {
+                // Toggle: if cursor is already inside a <code>, unwrap it; otherwise wrap selection
+                const sel = window.getSelection()
+                if (!sel || !sel.rangeCount) return
+                const range = sel.getRangeAt(0)
+                // Check if selection/cursor is inside a <code> element
+                let node = sel.anchorNode
+                if (node?.nodeType === Node.TEXT_NODE) node = node.parentElement
+                const existingCode = node?.closest('code')
+                if (existingCode) {
+                    // Unwrap: replace <code> with its text content
+                    const parent = existingCode.parentNode
+                    while (existingCode.firstChild) parent.insertBefore(existingCode.firstChild, existingCode)
+                    parent.removeChild(existingCode)
+                } else {
+                    const code = document.createElement('code')
+                    code.appendChild(range.extractContents())
+                    range.insertNode(code)
+                    range.setStartAfter(code)
+                    range.collapse(true)
+                    sel.removeAllRanges()
+                    sel.addRange(range)
+                }
+                break
+            }
         }
     }
 
@@ -41,16 +188,15 @@ export default class ElementEditor {
         this._storybook = storybook
         this._allElements = allElements
         const isEdit = !!element
-        this._descMode = isEdit ? 'preview' : 'write'
         const el = element || {
             name: '', description: '', typeId: storybook.elementTypes[0]?.id || null,
             groupIds: [], tags: [], color: 'indigo', icon: 'circle',
             starred: false, properties: {}, relationships: []
         }
-
         this._tags = [...(el.tags || [])]
         this._relationships = (el.relationships || []).map(r => ({ ...r }))
         this._groupIds = [...(el.groupIds || [])]
+        this._avatar = el.avatar || null
         this._colorPicker = new ColorPicker(el.color)
         this._iconPicker = new IconPicker(el.icon)
         this._selectedTypeId = el.typeId
@@ -98,6 +244,26 @@ export default class ElementEditor {
                             value="${this._esc(el.name)}" placeholder="${t('name')}">
                     </div>
                     <div class="editor-field">
+                        <label class="form-label">${t('avatar')}</label>
+                        <div class="avatar-upload-wrap" id="el-avatar-wrap">
+                            <div class="avatar-preview" id="el-avatar-preview">
+                                ${el.avatar
+                                    ? `<img src="${el.avatar}" class="avatar-preview-img" alt="">`
+                                    : `<wa-icon name="${el.icon}" class="avatar-preview-icon"></wa-icon>`}
+                            </div>
+                            <div class="avatar-upload-actions">
+                                <label class="avatar-upload-btn" for="el-avatar-input">
+                                    <wa-icon name="arrow-up-from-bracket"></wa-icon>
+                                    ${t('uploadAvatar')}
+                                </label>
+                                <input id="el-avatar-input" type="file" accept="image/*" style="display:none">
+                                ${el.avatar ? `<button type="button" class="avatar-remove-btn" id="el-avatar-remove">
+                                    <wa-icon name="xmark"></wa-icon>${t('removeAvatar')}
+                                </button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="editor-field">
                         <label class="form-label">${t('color')}</label>
                         ${this._colorPicker.render()}
                     </div>
@@ -116,16 +282,20 @@ export default class ElementEditor {
                         </wa-button>
                     </div>
                     <div class="editor-field">
-                        <div class="desc-header">
-                            <label class="form-label" for="el-desc">${t('description')}</label>
-                            <div class="seg-ctrl desc-tabs">
-                                <button class="seg-btn desc-tab ${this._descMode === 'write' ? 'active' : ''}" data-tab="write">${t('write')}</button>
-                                <button class="seg-btn desc-tab ${this._descMode === 'preview' ? 'active' : ''}" data-tab="preview">${t('preview')}</button>
-                            </div>
+                        <label class="form-label">${t('description')}</label>
+                        <div class="desc-toolbar">
+                            <button type="button" class="desc-tool" data-format="h1" title="${t('heading')}"><wa-icon name="heading"></wa-icon><span>H1</span></button>
+                            <button type="button" class="desc-tool" data-format="h2" title="${t('subheading')}"><wa-icon name="heading"></wa-icon><span>H2</span></button>
+                            <div class="desc-toolbar-sep"></div>
+                            <button type="button" class="desc-tool" data-format="bold" title="${t('bold')}"><wa-icon name="bold"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="underline" title="${t('underline')}"><wa-icon name="underline"></wa-icon></button>
+                            <button type="button" class="desc-tool" data-format="code" title="${t('codeBlock')}"><wa-icon name="code"></wa-icon></button>
+                            <div class="desc-toolbar-sep"></div>
+                            <button type="button" class="desc-tool" data-format="ul" title="${t('bulletList')}"><wa-icon name="list-ul"></wa-icon></button>
                         </div>
-                        <textarea id="el-desc" class="form-control form-textarea" rows="7"
-                            placeholder="Markdown supported…">${this._esc(el.description)}</textarea>
-                        <div id="el-desc-preview" class="markdown-preview hidden"></div>
+                        <div id="el-desc" class="rich-editor" contenteditable="true"
+                            data-placeholder="${t('descriptionPlaceholder')}"></div>
+                        <div id="el-desc-ctxmenu" class="rich-ctxmenu hidden"></div>
                     </div>
                     <div class="editor-scroll-pad"></div>
                 </div>
@@ -593,6 +763,41 @@ export default class ElementEditor {
         this._colorPicker.bind(root)
         this._iconPicker.bind(root)
 
+        // Avatar upload
+        const avatarInput = root.querySelector('#el-avatar-input')
+        const avatarPreview = root.querySelector('#el-avatar-preview')
+        const _removeAvatar = () => {
+            this._avatar = null
+            const icon = this._iconPicker?.selected || 'circle'
+            avatarPreview.innerHTML = `<wa-icon name="${icon}" class="avatar-preview-icon"></wa-icon>`
+            const removeBtn = root.querySelector('#el-avatar-remove')
+            if (removeBtn) removeBtn.remove()
+            if (avatarInput) avatarInput.value = ''
+        }
+        if (avatarInput) {
+            avatarInput.addEventListener('change', e => {
+                const file = e.target.files[0]
+                if (!file) return
+                const reader = new FileReader()
+                reader.onload = ev => {
+                    this._avatar = ev.target.result
+                    avatarPreview.innerHTML = `<img src="${this._avatar}" class="avatar-preview-img" alt="">`
+                    const wrap = root.querySelector('#el-avatar-wrap')
+                    if (wrap && !wrap.querySelector('#el-avatar-remove')) {
+                        const removeBtn = document.createElement('button')
+                        removeBtn.type = 'button'
+                        removeBtn.className = 'avatar-remove-btn'
+                        removeBtn.id = 'el-avatar-remove'
+                        removeBtn.innerHTML = `<wa-icon name="xmark"></wa-icon>${t('removeAvatar')}`
+                        wrap.querySelector('.avatar-upload-actions').appendChild(removeBtn)
+                        removeBtn.addEventListener('click', () => _removeAvatar())
+                    }
+                }
+                reader.readAsDataURL(file)
+            })
+        }
+        root.querySelector('#el-avatar-remove')?.addEventListener('click', () => _removeAvatar())
+
         root.querySelectorAll('[data-modal-close]').forEach(btn =>
             btn.addEventListener('click', () => this.modal.close()))
 
@@ -602,19 +807,163 @@ export default class ElementEditor {
             this._renderProps()
         })
 
-        const descCtrl = root.querySelector('.desc-tabs')
-        root.querySelectorAll('.desc-tab').forEach(btn => {
+        // Rich text editor (contenteditable) setup
+        const editor = root.querySelector('#el-desc')
+        const ctxmenu = root.querySelector('#el-desc-ctxmenu')
+
+        // Populate with initial content as HTML
+        editor.innerHTML = this._mdToHtml(this._elData.description || '')
+
+        // Toolbar buttons — mousedown prevents blur, click applies format then updates state
+        root.querySelectorAll('.desc-tool').forEach(btn => {
+            btn.addEventListener('mousedown', e => e.preventDefault())
             btn.addEventListener('click', () => {
-                this._descMode = btn.dataset.tab
-                root.querySelectorAll('.desc-tab').forEach(b =>
-                    b.classList.toggle('active', b.dataset.tab === this._descMode))
-                segCtrlUpdateIndicator(descCtrl)
-                this._applyDescMode(root)
+                this._applyFormat(editor, btn.dataset.format)
+                this._updateToolbarState(root)
             })
         })
-        // Initialize preview state (defaults to preview when editing)
-        this._applyDescMode(root)
-        requestAnimationFrame(() => segCtrlUpdateIndicator(descCtrl, true))
+
+        // Update toolbar state on cursor movement / selection change
+        editor.addEventListener('keyup',   () => this._updateToolbarState(root))
+        editor.addEventListener('mouseup', () => this._updateToolbarState(root))
+        // selectionchange fires on document, filter to this editor
+        document.addEventListener('selectionchange', () => {
+            if (document.activeElement === editor) this._updateToolbarState(root)
+        })
+
+        // Keyboard shortcuts (Ctrl/Cmd+Z for undo, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y for redo)
+        editor.addEventListener('keydown', e => {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+            const mod = isMac ? e.metaKey : e.ctrlKey
+            if (mod && e.key === 'z' && !e.shiftKey) {
+                document.execCommand('undo')
+                e.preventDefault()
+            } else if ((mod && e.key === 'z' && e.shiftKey) || (mod && e.key === 'y')) {
+                document.execCommand('redo')
+                e.preventDefault()
+            }
+        })
+
+        // Helper: build and bind the formatting icon row inside the context menu
+        const renderFmtRow = () => {
+            const fmts = [
+                { format: 'h1',        icon: 'heading', label: 'H1' },
+                { format: 'h2',        icon: 'heading', label: 'H2' },
+                { type: 'sep' },
+                { format: 'bold',      icon: 'bold' },
+                { format: 'underline', icon: 'underline' },
+                { format: 'code',      icon: 'code' },
+                { type: 'sep' },
+                { format: 'ul',        icon: 'list-ul' },
+            ]
+
+            // Detect current active states using the same logic as _updateToolbarState
+            let isBold = false, isUnderline = false, isUL = false, isCode = false, blockTag = null
+            try {
+                isBold      = document.queryCommandState('bold')
+                isUnderline = document.queryCommandState('underline')
+                isUL        = document.queryCommandState('insertUnorderedList')
+                blockTag    = this._cursorBlockTag()
+                let codeCheck = window.getSelection()?.anchorNode
+                if (codeCheck?.nodeType === Node.TEXT_NODE) codeCheck = codeCheck.parentElement
+                isCode = !!codeCheck?.closest('code')
+            } catch (_) {}
+
+            const isActive = fmt => {
+                if (fmt === 'bold')      return isBold
+                if (fmt === 'underline') return isUnderline
+                if (fmt === 'ul')        return isUL
+                if (fmt === 'code')      return isCode
+                if (fmt === 'h1')        return blockTag === 'H1'
+                if (fmt === 'h2')        return blockTag === 'H2'
+                return false
+            }
+
+            const row = document.createElement('div')
+            row.className = 'rich-ctxmenu-fmt-row'
+
+            fmts.forEach(item => {
+                if (item.type === 'sep') {
+                    const sep = document.createElement('div')
+                    sep.className = 'desc-toolbar-sep'
+                    row.appendChild(sep)
+                    return
+                }
+                const btn = document.createElement('button')
+                btn.type = 'button'
+                btn.className = 'rich-ctxmenu-fmt-btn' + (isActive(item.format) ? ' active' : '')
+                btn.title = item.format
+                btn.innerHTML = `<wa-icon name="${item.icon}"></wa-icon>${item.label ? `<span>${item.label}</span>` : ''}`
+                btn.addEventListener('mousedown', ev => ev.preventDefault())
+                btn.addEventListener('click', () => {
+                    this._applyFormat(editor, item.format)
+                    // Refresh row active states in-place without closing menu
+                    const newRow = renderFmtRow()
+                    row.replaceWith(newRow)
+                    this._updateToolbarState(root)
+                })
+                row.appendChild(btn)
+            })
+            return row
+        }
+
+        // Context menu on right-click
+        editor.addEventListener('contextmenu', e => {
+            e.preventDefault()
+            const sel = window.getSelection()
+            const hasSelection = sel && !sel.isCollapsed
+
+            ctxmenu.innerHTML = ''
+
+            // Formatting icon row (always shown)
+            ctxmenu.appendChild(renderFmtRow())
+
+            // Separator
+            const sep = document.createElement('div')
+            sep.className = 'rich-ctxmenu-sep'
+            ctxmenu.appendChild(sep)
+
+            // Clipboard items
+            const clipItems = [
+                hasSelection && { label: t('cut'),   action: () => document.execCommand('cut') },
+                hasSelection && { label: t('copy'),  action: () => document.execCommand('copy') },
+                { label: t('paste'), action: () => document.execCommand('paste') },
+            ].filter(Boolean)
+
+            clipItems.forEach(item => {
+                const btn = document.createElement('button')
+                btn.type = 'button'
+                btn.className = 'rich-ctxmenu-item'
+                btn.textContent = item.label
+                btn.addEventListener('click', () => {
+                    item.action()
+                    ctxmenu.classList.add('hidden')
+                })
+                ctxmenu.appendChild(btn)
+            })
+
+            // Position: anchor to click point, flip up if near bottom
+            ctxmenu.style.left = e.clientX + 'px'
+            ctxmenu.style.top  = e.clientY + 'px'
+            ctxmenu.classList.remove('hidden')
+
+            requestAnimationFrame(() => {
+                const r = ctxmenu.getBoundingClientRect()
+                if (r.bottom > window.innerHeight - 8) {
+                    ctxmenu.style.top = (e.clientY - ctxmenu.offsetHeight) + 'px'
+                }
+                if (r.right > window.innerWidth - 8) {
+                    ctxmenu.style.left = (e.clientX - ctxmenu.offsetWidth) + 'px'
+                }
+            })
+        })
+
+        // Close context menu on outside click
+        document.addEventListener('click', e => {
+            if (!ctxmenu.contains(e.target) && e.target !== editor) {
+                ctxmenu.classList.add('hidden')
+            }
+        })
 
         // Tag input is now managed by _renderTags/_bindTagInput; no separate listener needed here
 
@@ -633,10 +982,11 @@ export default class ElementEditor {
         root.querySelector('#el-save')?.addEventListener('click', () => {
             const name = this._val('#el-name').trim()
             if (!name) { root.querySelector('#el-name')?.focus(); return }
+            const descEditor = root.querySelector('#el-desc')
             this.onSave({
                 ...(isEdit ? { id: elementId } : {}),
                 name,
-                description: this._val('#el-desc'),
+                description: descEditor ? this._htmlToMd(descEditor.innerHTML) : '',
                 typeId: this._selectedTypeId,
                 color: this._colorPicker.selected,
                 icon: this._iconPicker.selected,
@@ -644,7 +994,8 @@ export default class ElementEditor {
                 tags: this._tags,
                 groupIds: this._groupIds,
                 properties: this._properties,
-                relationships: this._relationships
+                relationships: this._relationships,
+                avatar: this._avatar ?? null
             })
             this.modal.close()
         })

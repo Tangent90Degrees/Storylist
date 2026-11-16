@@ -4,7 +4,7 @@ export default class Element {
     constructor({
         id, storybookId, name, description, typeId, groupIds,
         tags, color, icon, starred, properties, relationships,
-        createdAt, updatedAt
+        avatar, createdAt, updatedAt
     } = {}) {
         this.id = id || uuid()
         this.storybookId = storybookId || null
@@ -18,6 +18,7 @@ export default class Element {
         this.starred = starred || false
         this.properties = properties ? { ...properties } : {}
         this.relationships = relationships ? relationships.map(r => ({ ...r })) : []
+        this.avatar = avatar || null
         this.createdAt = createdAt || new Date().toISOString()
         this.updatedAt = updatedAt || new Date().toISOString()
     }
@@ -48,7 +49,7 @@ export default class Element {
     update(data) {
         const allow = [
             'name', 'description', 'typeId', 'groupIds', 'tags',
-            'color', 'icon', 'starred', 'properties', 'relationships'
+            'color', 'icon', 'starred', 'properties', 'relationships', 'avatar'
         ]
         for (const key of allow) {
             if (key in data) this[key] = data[key]
@@ -69,6 +70,7 @@ export default class Element {
             color: this.color,
             icon: this.icon,
             starred: this.starred,
+            avatar: this.avatar,
             properties: this.properties,
             relationships: this.relationships,
             createdAt: this.createdAt,

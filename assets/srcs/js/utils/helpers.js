@@ -27,14 +27,16 @@ export function relativeTime(dateStr) {
     return formatDate(dateStr)
 }
 
-// Strip markdown markers so we can show a short plain-text snippet on cards.
+// Strip markdown markers (and HTML underline tags) for plain-text card snippets.
 export function stripMarkdown(text) {
     if (!text) return ''
     return text
         .replace(/^#{1,6}\s+/gm, '')
         .replace(/\*\*(.*?)\*\*/g, '$1')
         .replace(/\*(.*?)\*/g, '$1')
+        .replace(/<u>(.*?)<\/u>/g, '$1')
         .replace(/`(.*?)`/g, '$1')
+        .replace(/```[\s\S]*?```/g, '')
         .replace(/\[(.*?)\]\((.*?)\)/g, '$1')
         .replace(/^\s*[-*+]\s+/gm, '')
         .replace(/^\s*>\s+/gm, '')

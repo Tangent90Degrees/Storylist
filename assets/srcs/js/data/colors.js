@@ -127,20 +127,6 @@ export const COLORS = [
     }
 ]
 
-export class ColorSet {
-    constructor(label, primary, darker, lighter) {
-        this.label   = label
-        this.primary = primary
-        this.darker  = darker
-        this.lighter = lighter
-    }
-}
-
-export const COLOR_DIST = {
-    lightgray: new ColorSet("Light Gray", "#cbd5e1", "#64748b", "#e2e8f0"),
-    slategray: new ColorSet("Slate Gray", "#8c94a2", "#475569", "#cbd5e1")
-}
-
 export function getColor(id) {
     return COLORS.find((c) => c.id === id) || COLORS[13] // default: indigo
 }

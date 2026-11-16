@@ -91,7 +91,7 @@ export default class Dashboard {
         document.body.appendChild(measurer)
 
         for (const el of elements) {
-            const card = new ElementCard(el, storybook, incoming[el.id] || 0, this.callbacks)
+            const card = new ElementCard(el, storybook, incoming[el.id] || 0, this.callbacks, elements)
             measurer.innerHTML = card.render()
             const node = measurer.firstElementChild
             if (!node) continue
@@ -118,7 +118,7 @@ export default class Dashboard {
         // Bind events on the placed cards
         this._dash.querySelectorAll('.element-card').forEach(node => {
             const el = elements.find(e => e.id === node.dataset.id)
-            if (el) new ElementCard(el, storybook, incoming[el.id] || 0, this.callbacks).bindEvents(node)
+            if (el) new ElementCard(el, storybook, incoming[el.id] || 0, this.callbacks, elements).bindEvents(node)
         })
     }
 
