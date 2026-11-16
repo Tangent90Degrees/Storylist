@@ -264,8 +264,44 @@
     transition     : background var(--wa-transition-fast);
 }
 
+/* Always keep the collapse button visible even when collapsed */
+.prop-row.prop-collapsed .prop-collapse-btn {
+    display: flex;
+}
+
 .prop-collapse-btn:hover {
     background: var(--wa-color-neutral-fill-quiet);
+}
+
+/* Copy / Paste buttons — same size as collapse btn */
+.prop-copy-btn,
+.prop-paste-btn {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    width          : 32px;
+    height         : 32px;
+    flex-shrink    : 0;
+    border         : none;
+    background     : none;
+    padding        : 0;
+    color          : var(--wa-color-text-quiet);
+    font-size      : 12px;
+    cursor         : pointer;
+    border-radius  : var(--radius);
+    transition     : background var(--wa-transition-fast), color var(--wa-transition-fast),
+                     opacity var(--wa-transition-fast);
+}
+
+.prop-copy-btn:hover,
+.prop-paste-btn:hover:not(:disabled) {
+    background: var(--wa-color-neutral-fill-quiet);
+    color     : var(--wa-color-text-normal);
+}
+
+.prop-paste-btn:disabled {
+    opacity: 0.3;
+    cursor : not-allowed;
 }
 
 .prop-row-body {

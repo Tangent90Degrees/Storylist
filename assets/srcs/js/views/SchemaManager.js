@@ -21,6 +21,7 @@ export default class SchemaManager {
         this._groups = storybook.elementGroups.map(g => this._cloneGroup(g))
         this._activeTab  = 'types'
         this._selectedId = this._types[0]?.id || null
+        this._propClipboard = null  // stores a deep-copied property config
 
         this._renderShell()
     }
@@ -276,6 +277,14 @@ export default class SchemaManager {
                     ${typeOptions}
                 </select>
                 <div class="prop-row-actions">
+                    <button type="button" class="prop-copy-btn" data-role="prop-copy"
+                        title="${t('copyProperty')}">
+                        <wa-icon name="copy"></wa-icon>
+                    </button>
+                    <button type="button" class="prop-paste-btn" data-role="prop-paste"
+                        title="${t('pasteProperty')}" ${!this._propClipboard ? 'disabled' : ''}>
+                        <wa-icon name="paste"></wa-icon>
+                    </button>
                     <button type="button" class="prop-collapse-btn" data-role="prop-collapse"
                         title="${t('collapse')}">
                         <wa-icon name="chevron-down"></wa-icon>
@@ -409,6 +418,33 @@ export default class SchemaManager {
             row.querySelector('[data-role="remove-prop"]')?.addEventListener('click', () => {
                 if (!confirm(t('confirmRemoveProperty'))) return
                 item.properties = item.properties.filter(p => p.id !== propId)
+                this._renderProps(item, container)
+            })
+
+            // Copy property configuration to clipboard
+            row.querySelector('[data-role="prop-copy"]')?.addEventListener('click', () => {
+                this._propClipboard = JSON.parse(JSON.stringify({
+                    name: pd.name,
+                    type: pd.type,
+                    cardDisplay: pd.cardDisplay,
+                    showOnCard: pd.showOnCard,
+                    options: (pd.options || []).map(o => ({ ...o }))
+                }))
+                // Enable all paste buttons
+                container.querySelectorAll('[data-role="prop-paste"]').forEach(b => b.disabled = false)
+            })
+
+            // Paste property configuration from clipboard (with confirmation)
+            row.querySelector('[data-role="prop-paste"]')?.addEventListener('click', () => {
+                if (!this._propClipboard) return
+                if (!confirm(t('pastePropertyConfirm'))) return
+                const clip = this._propClipboard
+                pd.name = clip.name
+                pd.type = clip.type
+                pd.cardDisplay = clip.cardDisplay
+                pd.showOnCard = clip.showOnCard
+                pd.options = (clip.options || []).map(o => ({ ...o, id: uuid() }))
+                pd.nameKey = null
                 this._renderProps(item, container)
             })
 

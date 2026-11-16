@@ -145,6 +145,9 @@ const translations = {
         addGroupProperty: 'Add group…',
         removeGroup: 'Remove group',
         noIcon: 'No icon',
+        copyProperty: 'Copy property',
+        pasteProperty: 'Paste property',
+        pastePropertyConfirm: 'Replace this property with the copied configuration?',
         collapse: 'Collapse',
     },
     zh: {
@@ -290,6 +293,9 @@ const translations = {
         addGroupProperty: '添加分组…',
         removeGroup: '移除分组',
         noIcon: '无图标',
+        copyProperty: '复制属性',
+        pasteProperty: '粘贴属性',
+        pastePropertyConfirm: '将此属性替换为已复制的配置？',
         collapse: '折叠',
     }
 }
