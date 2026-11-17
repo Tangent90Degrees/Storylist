@@ -784,7 +784,7 @@ select.form-control {
 .avatar-crop-canvas {
     width             : 200px;
     height            : 200px;
-    border-radius     : 50%;
+    border-radius     : var(--radius);
     cursor            : grab;
     touch-action      : none;
     background        : var(--wa-color-surface-lowered);

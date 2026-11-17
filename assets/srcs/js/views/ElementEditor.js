@@ -876,6 +876,8 @@ export default class ElementEditor {
         }
         // Bind crop button on initial render
         root.querySelector('#el-avatar-crop')?.addEventListener('click', () => this._openCropEditor(root))
+        // Bind remove button on initial render (when avatar already set from saved data)
+        root.querySelector('#el-avatar-remove')?.addEventListener('click', () => _removeAvatar())
 
         root.querySelectorAll('[data-modal-close]').forEach(btn =>
             btn.addEventListener('click', () => this.modal.close()))
@@ -1131,14 +1133,6 @@ export default class ElementEditor {
         const draw = () => {
             ctx.clearRect(0, 0, SIZE, SIZE)
             ctx.drawImage(img, offsetX, offsetY, img.naturalWidth * scale, img.naturalHeight * scale)
-            // Circular clip guide
-            ctx.save()
-            ctx.strokeStyle = 'rgba(255,255,255,0.7)'
-            ctx.lineWidth = 1.5
-            ctx.beginPath()
-            ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 2, 0, Math.PI * 2)
-            ctx.stroke()
-            ctx.restore()
         }
 
         const clamp = () => {
