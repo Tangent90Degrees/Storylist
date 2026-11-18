@@ -3,7 +3,7 @@
 
 import Storage from '../utils/storage.js'
 import { t, setLocale, getLocale, toggleLocale } from '../utils/i18n.js'
-import { debounce } from '../utils/helpers.js'
+import { debounce, uuid } from '../utils/helpers.js'
 import Storybook from '../models/Storybook.js'
 import Element from '../models/Element.js'
 import Dashboard from './Dashboard.js'
@@ -11,6 +11,7 @@ import Modal from './Modal.js'
 import StorybookModal from './StorybookModal.js'
 import ElementEditor from './ElementEditor.js'
 import SchemaManager from './SchemaManager.js'
+import BoardView from './BoardView.js'
 
 export default class App {
     // ── state ──────────────────────────────────────────────────────────────
@@ -22,6 +23,8 @@ export default class App {
     #filterType = null
     #theme = 'light'
     #font = 'sans'
+    #view = 'dashboard'  // 'dashboard' | 'schema' | 'board'
+    #currentBoardId = null
 
     constructor() { }
 
@@ -36,6 +39,7 @@ export default class App {
         this._sbModal = new StorybookModal(this._modal, data => this._handleSbSave(data))
         this._elEditor = new ElementEditor(this._modal, data => this._handleElSave(data))
         this._schemaMgr = new SchemaManager(this._modal, data => this._handleSchemaSave(data))
+        this._boardView = new BoardView(board => this._handleBoardSave(board))
         this._bindGlobalUI()
         this._render()
     }
@@ -152,6 +156,61 @@ export default class App {
         this._render()
     }
 
+    // ── board CRUD ────────────────────────────────────────────────────────────
+    _handleBoardSave(board) {
+        const sb = this._currentSb
+        if (!sb) return
+        // board is a live reference into sb.boards; cards are mutated in place
+        // by BoardView's mouse handlers, so we just need to persist.
+        sb.touch()
+        this._save()
+    }
+
+    _addBoard() {
+        const sb = this._currentSb
+        if (!sb) return
+        const name = prompt(t('boardName') + ':', t('untitledBoard'))
+        if (!name) return
+        const board = {
+            id: uuid(),
+            name: name.trim() || t('untitledBoard'),
+            cards: []
+        }
+        sb.boards.push(board)
+        sb.touch()
+        this._save()
+        this._renderBoardsList()
+        this._openBoard(board.id)
+    }
+
+    _deleteBoard(boardId) {
+        if (!confirm(t('deleteBoardConfirm'))) return
+        const sb = this._currentSb
+        if (!sb) return
+        sb.boards = sb.boards.filter(b => b.id !== boardId)
+        sb.touch()
+        this._save()
+        this.#view = 'dashboard'
+        this._render()
+    }
+
+    _openBoard(boardId) {
+        const sb = this._currentSb
+        if (!sb) return
+        const board = sb.boards.find(b => b.id === boardId)
+        if (!board) return
+        this.#view = 'board'
+        this.#currentBoardId = boardId
+        this._syncNavButtons()
+        // Show board container, hide story-view and empty-state
+        document.getElementById('story-view')?.classList.add('hidden')
+        document.getElementById('empty-state')?.classList.add('hidden')
+        const boardContainer = document.getElementById('board-container')
+        boardContainer?.classList.remove('hidden')
+        const elements = this._sbElements(sb.id)
+        this._boardView.open(board, elements, sb)
+    }
+
     _selectStorybook(id) {
         this.#currentId = id
         this.#filterType = null
@@ -202,8 +261,6 @@ export default class App {
 
     // ── UI wiring ──────────────────────────────────────────────────────────
     _bindGlobalUI() {
-        document.getElementById('btn-new-storybook')
-            ?.addEventListener('click', () => this._sbModal.open())
         document.getElementById('btn-create-first')
             ?.addEventListener('click', () => this._sbModal.open())
         document.getElementById('btn-add-element')
@@ -236,28 +293,70 @@ export default class App {
                 this.#search = e.target.value.trim()
                 this._renderDashboard()
             }, 200))
-            // Sort buttons — wa-button click
-            ;['sort-date', 'sort-az', 'sort-imp'].forEach(id => {
-                document.getElementById(id)?.addEventListener('click', () => {
-                    const btn = document.getElementById(id)
-                    this.#sort = btn.dataset.sort
-                    this._syncSortButtons()
-                    this._renderDashboard()
+        ;['sort-date', 'sort-az', 'sort-imp'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => {
+                const btn = document.getElementById(id)
+                this.#sort = btn.dataset.sort
+                this._syncSortButtons()
+                this._renderDashboard()
+            })
+        })
+
+        // Sidebar nav
+        document.getElementById('sidebar-nav')?.querySelectorAll('.sidebar-nav-item')
+            .forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.#view = btn.dataset.view
+                    this._syncNavButtons()
+                    if (this.#view === 'schema') {
+                        const sb = this._currentSb
+                        if (sb) this._schemaMgr.open(sb)
+                        // Snap back to dashboard after schema modal closes
+                        const origOnClose = this._modal.onClose
+                        this._modal.onClose = () => {
+                            if (origOnClose) origOnClose()
+                            this.#view = 'dashboard'
+                            this._syncNavButtons()
+                            this._render()
+                        }
+                    } else if (this.#view === 'dashboard') {
+                        this._render()
+                    }
                 })
             })
-        document.getElementById('btn-manage-schema')
-            ?.addEventListener('click', () => {
-                const sb = this._currentSb
-                if (sb) this._schemaMgr.open(sb)
+
+        // Add board button
+        document.getElementById('btn-add-board')
+            ?.addEventListener('click', () => this._addBoard())
+
+        // Storybook info panel: open dropdown
+        document.getElementById('sb-info-trigger')
+            ?.addEventListener('click', e => {
+                e.stopPropagation()
+                this._toggleSbDropdown()
             })
+
+        // Close dropdown on outside click
+        document.addEventListener('click', () => {
+            const dd = document.getElementById('sb-dropdown')
+            if (dd && !dd.classList.contains('hidden')) {
+                dd.classList.add('hidden')
+                document.getElementById('sb-info')?.classList.remove('open')
+            }
+        })
     }
 
     // ── render ─────────────────────────────────────────────────────────────
     _render() {
         this._renderSidebar()
         const sb = this._currentSb
-        const emptyState = document.getElementById('empty-state')
-        const storyView = document.getElementById('story-view')
+        const emptyState     = document.getElementById('empty-state')
+        const storyView      = document.getElementById('story-view')
+        const boardContainer = document.getElementById('board-container')
+
+        // Always hide board container on a full re-render (dashboard/empty-state)
+        boardContainer?.classList.add('hidden')
+        this.#view = 'dashboard'
 
         if (!sb) {
             emptyState.classList.remove('hidden')
@@ -276,6 +375,7 @@ export default class App {
         if (langLabel) langLabel.textContent = getLocale().toUpperCase()
         this._syncSortButtons()
         this._syncThemeIcon()
+        this._syncNavButtons()
     }
 
     _syncSortButtons() {
@@ -290,37 +390,142 @@ export default class App {
         if (icon) icon.setAttribute('name', this.#theme === 'dark' ? 'moon' : 'sun')
     }
 
+    _syncNavButtons() {
+        document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === this.#view)
+        })
+    }
+
     _renderSidebar() {
-        const list = document.getElementById('storybook-list')
-        if (!this.#storybooks.length) {
-            list.innerHTML = `<p class="sb-empty">${t('storybooks')}</p>`
-            return
+        const sb = this._currentSb
+
+        // Update storybook info panel at the top
+        const infoName   = document.getElementById('sb-info-name')
+        const infoAuthor = document.getElementById('sb-info-author')
+        const infoAvatar = document.getElementById('sb-info-avatar')
+        const sbInfo     = document.getElementById('sb-info')
+
+        if (infoName && infoAuthor && infoAvatar) {
+            if (sb) {
+                const c = this._colorVal(sb.color)
+                infoName.textContent   = sb.name
+                infoAuthor.textContent = sb.author || ''
+                infoAvatar.style.background = c
+                infoAvatar.style.color = '#fff'
+                infoAvatar.innerHTML = `<wa-icon name="${sb.icon}"></wa-icon>`
+                sbInfo?.classList.remove('no-sb')
+            } else {
+                infoName.textContent   = t('newStorybook')
+                infoAuthor.textContent = ''
+                infoAvatar.style.background = 'var(--wa-color-neutral-fill-quiet)'
+                infoAvatar.style.color = 'var(--wa-color-text-quiet)'
+                infoAvatar.innerHTML = `<wa-icon name="book-open"></wa-icon>`
+                sbInfo?.classList.add('no-sb')
+            }
         }
-        list.innerHTML = this.#storybooks.map(sb => `
-            <div class="sb-item ${sb.id === this.#currentId ? 'active' : ''}"
-                data-sb="${sb.id}">
-                <div class="sb-icon" style="background:${this._colorVal(sb.color)}22; color:${this._colorVal(sb.color)}">
+
+        // Build the dropdown and boards list
+        this._renderSbDropdown()
+        this._renderBoardsList()
+    }
+
+    _renderSbDropdown() {
+        const dd = document.getElementById('sb-dropdown')
+        if (!dd) return
+
+        const rows = this.#storybooks.map(sb => {
+            const c = this._colorVal(sb.color)
+            const isActive = sb.id === this.#currentId
+            return `<div class="sb-dd-item ${isActive ? 'active' : ''}" data-sb="${sb.id}">
+                <div class="sb-dd-icon" style="background:${c};color:#fff">
                     <wa-icon name="${sb.icon}"></wa-icon>
                 </div>
-                <span class="sb-name">${sb.name}</span>
-                <wa-button class="sb-edit-btn" variant="neutral" appearance="text" size="s"
-                    data-edit="${sb.id}" title="${t('editStorybook')}">
+                <div class="sb-dd-text">
+                    <span class="sb-dd-name">${sb.name}</span>
+                    ${sb.author ? `<span class="sb-dd-author">${sb.author}</span>` : ''}
+                </div>
+                <button type="button" class="sb-dd-edit" data-edit="${sb.id}"
+                    title="${t('editStorybook')}">
                     <wa-icon name="sliders"></wa-icon>
-                </wa-button>
-            </div>`).join('')
+                </button>
+            </div>`
+        }).join('')
 
-        list.querySelectorAll('.sb-item').forEach(node => {
+        const newBtn = `<div class="sb-dd-new">
+            <button type="button" class="sb-dd-new-btn" id="sb-dd-new">
+                <wa-icon name="plus"></wa-icon>
+                ${t('newStorybook')}
+            </button>
+        </div>`
+
+        dd.innerHTML = rows + newBtn
+
+        dd.querySelectorAll('.sb-dd-item').forEach(node => {
             node.addEventListener('click', e => {
-                if (e.target.closest('[data-edit]') || e.target.closest('wa-button')) return
+                if (e.target.closest('.sb-dd-edit')) return
                 this._selectStorybook(node.dataset.sb)
+                dd.classList.add('hidden')
+                document.getElementById('sb-info')?.classList.remove('open')
             })
         })
-        list.querySelectorAll('[data-edit]').forEach(btn => {
+        dd.querySelectorAll('.sb-dd-edit').forEach(btn => {
             btn.addEventListener('click', e => {
                 e.stopPropagation()
-                const sbId = btn.dataset.edit || btn.closest('[data-edit]')?.dataset.edit
-                const sb = this.#storybooks.find(s => s.id === sbId)
-                if (sb) this._sbModal.open(sb)
+                const sbItem = this.#storybooks.find(s => s.id === btn.dataset.edit)
+                if (sbItem) this._sbModal.open(sbItem)
+                dd.classList.add('hidden')
+                document.getElementById('sb-info')?.classList.remove('open')
+            })
+        })
+        dd.querySelector('#sb-dd-new')?.addEventListener('click', () => {
+            this._sbModal.open()
+            dd.classList.add('hidden')
+            document.getElementById('sb-info')?.classList.remove('open')
+        })
+    }
+
+    _toggleSbDropdown() {
+        const dd = document.getElementById('sb-dropdown')
+        const info = document.getElementById('sb-info')
+        if (!dd) return
+        this._renderSbDropdown()
+        const isOpen = !dd.classList.contains('hidden')
+        dd.classList.toggle('hidden', isOpen)
+        info?.classList.toggle('open', !isOpen)
+    }
+
+    _renderBoardsList() {
+        const list = document.getElementById('boards-list')
+        if (!list) return
+        const sb = this._currentSb
+        const boards = sb?.boards || []
+        if (!boards.length) {
+            list.innerHTML = '<p class="boards-empty">No boards yet</p>'
+            return
+        }
+        list.innerHTML = boards.map(b => {
+            const isActive = this.#currentBoardId === b.id && this.#view === 'board'
+            return `<div class="board-item ${isActive ? 'active' : ''}" data-board="${b.id}">
+                <wa-icon name="table-columns"></wa-icon>
+                <span class="board-item-name">${b.name}</span>
+                <button class="board-item-delete" data-del="${b.id}" title="${t('deleteBoard')}">
+                    <wa-icon name="xmark"></wa-icon>
+                </button>
+            </div>`
+        }).join('')
+
+        list.querySelectorAll('.board-item').forEach(node => {
+            node.addEventListener('click', e => {
+                if (e.target.closest('.board-item-delete')) return
+                this._openBoard(node.dataset.board)
+                list.querySelectorAll('.board-item').forEach(n =>
+                    n.classList.toggle('active', n.dataset.board === node.dataset.board))
+            })
+        })
+        list.querySelectorAll('.board-item-delete').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation()
+                this._deleteBoard(btn.dataset.del)
             })
         })
     }

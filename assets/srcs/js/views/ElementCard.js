@@ -3,6 +3,7 @@
 import { getColorValue, getColorDarker, getColorLighter } from '../data/colors.js'
 import { stripMarkdown, relativeTime } from '../utils/helpers.js'
 import { t } from '../utils/i18n.js'
+import { TagRow } from '../utils/TagRow.js'
 
 export default class ElementCard {
     constructor(el, storybook, incomingCount, callbacks, allElements = []) {
@@ -94,45 +95,9 @@ export default class ElementCard {
         ).forEach(c => this._fitChips(c, 'prop-chip-card'))
     }
 
-    // Fit the keyword tags row using the same overflow algorithm
-    _fitTags(node) {
-        const container = node.querySelector('.card-tags')
-        if (!container) return
-
-        // card-tag uses .badge-text for the label text (same compact pattern as card-badge)
-        // Reset
-        container.querySelector('.card-tag-more')?.remove()
-        container.querySelectorAll('.card-tag').forEach(c => c.classList.remove('card-tag-compact'))
-
-        if (container.scrollWidth <= container.clientWidth) return
-
-        const tags = [...container.querySelectorAll('.card-tag')]
-        if (!tags.length) return
-
-        // Step 2: collapse to first letter, from last to first
-        for (let i = tags.length - 1; i >= 0; i--) {
-            tags[i].classList.add('card-tag-compact')
-            if (container.scrollWidth <= container.clientWidth) return
-        }
-
-        // Step 3: fold remaining into plain "+N" text
-        let hidden = 0
-        const compacted = [...container.querySelectorAll('.card-tag-compact')]
-        for (let i = compacted.length - 1; i >= 0; i--) {
-            compacted[i].remove()
-            hidden++
-
-            let more = container.querySelector('.card-tag-more')
-            if (!more) {
-                more = document.createElement('span')
-                more.className = 'card-tag-more'
-                container.appendChild(more)
-            }
-            more.textContent = `+${hidden}`
-
-            if (container.scrollWidth <= container.clientWidth) return
-        }
-    }
+    // Fit the keyword tags row — <tag-row> custom element self-manages layout;
+    // this method is kept for interface consistency but is a no-op.
+    _fitTags(node) { }
 
     // Render an enum option chip with its icon if present
     _optChip(opt) {
@@ -277,12 +242,8 @@ export default class ElementCard {
         const desc      = stripMarkdown(el.description)
         const totalConn = el.relationships.length + this.incomingCount
 
-        // Render all tags — _fitTags handles overflow after mount
-        const tagHtml = el.tags.length
-            ? el.tags.map(tag =>
-                `<span class="card-tag" data-icon="" data-first="${(tag[0] || '').replace(/"/g, '')}"
-                    ><span class="badge-text">${tag}</span></span>`).join('')
-            : ''
+        // Render all tags — <tag-row> custom element handles overflow after mount
+        const tagHtml = el.tags.length ? TagRow.render(el.tags) : ''
 
         const iconContent = el.avatar
             ? `<img src="${el.avatar}" class="card-avatar-img" alt="">`

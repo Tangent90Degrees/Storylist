@@ -20,20 +20,41 @@
 
     <!-- ── Sidebar ─────────────────────────────────────────── -->
     <aside id="sidebar">
-        <div class="sidebar-header">
-            <div class="app-logo">
-                <wa-icon name="book-open" library="system" variant="solid"
-                    style="font-size:1.3em; color: var(--wa-color-brand-50)"></wa-icon>
-                <span class="logo-text">Storier</span>
+        <!-- Current storybook info + dropdown -->
+        <div id="sb-info" class="sb-info">
+            <div class="sb-info-current" id="sb-info-trigger">
+                <div class="sb-info-avatar" id="sb-info-avatar"></div>
+                <div class="sb-info-text">
+                    <span class="sb-info-name" id="sb-info-name"></span>
+                    <span class="sb-info-author" id="sb-info-author"></span>
+                </div>
+                <wa-icon name="chevron-down" class="sb-info-chevron"></wa-icon>
             </div>
-            <wa-button id="btn-new-storybook" variant="neutral" appearance="text" size="s"
-                title="New Storybook">
-                <wa-icon name="plus"></wa-icon>
-            </wa-button>
+            <div id="sb-dropdown" class="sb-dropdown hidden"></div>
         </div>
 
-        <p class="sidebar-section-label">Storybooks</p>
-        <div id="storybook-list" class="storybook-list"></div>
+        <!-- Navigation -->
+        <nav class="sidebar-nav" id="sidebar-nav">
+            <button class="sidebar-nav-item active" data-view="dashboard">
+                <wa-icon name="layer-group"></wa-icon>
+                <span>Dashboard</span>
+            </button>
+            <button class="sidebar-nav-item" data-view="schema">
+                <wa-icon name="sliders"></wa-icon>
+                <span>Schema</span>
+            </button>
+        </nav>
+
+        <!-- Boards list -->
+        <div class="sidebar-boards" id="sidebar-boards">
+            <div class="sidebar-boards-header">
+                <span class="sidebar-boards-label">Boards</span>
+                <button class="sidebar-boards-add" id="btn-add-board" title="New Board">
+                    <wa-icon name="plus"></wa-icon>
+                </button>
+            </div>
+            <div id="boards-list" class="boards-list"></div>
+        </div>
 
         <div class="sidebar-footer">
             <wa-button id="btn-toggle-theme" variant="neutral" appearance="text" size="s"
@@ -92,10 +113,6 @@
                             <wa-icon name="link"></wa-icon>
                         </wa-button>
                     </wa-button-group>
-                    <wa-button id="btn-manage-schema" variant="neutral" appearance="outlined" size="s" title="Manage schema">
-                        <wa-icon name="sliders" slot="prefix"></wa-icon>
-                        Schema
-                    </wa-button>
                     <wa-button id="btn-add-element" variant="neutral" appearance="outlined" size="s">
                         <wa-icon name="plus" slot="prefix"></wa-icon>
                         Add Element
@@ -106,6 +123,9 @@
             <div id="type-filter-bar" class="type-filter-bar"></div>
             <div id="dashboard" class="dashboard"></div>
         </div>
+
+        <!-- Board view — shown instead of story-view when a board is open -->
+        <div id="board-container" class="hidden"></div>
     </main>
 </div>
 

@@ -474,14 +474,61 @@
 }
 
 /* ── Card tags ───────────────────────────────────────────── */
+/* ── Shared tag-row component (TagRow.js) ───────────────────────────── */
+/* Wraps .card-tags and .bc-tags — same overflow rules in both contexts */
+.tag-row {
+    display    : flex;
+    flex-wrap  : nowrap;
+    overflow   : hidden;
+    gap        : var(--wa-space-2xs);
+}
+
+.tag-pill {
+    display      : inline-flex;
+    align-items  : center;
+    font-size    : var(--pill-font-sm);
+    font-weight  : 500;
+    padding      : var(--pill-pad-sm);
+    min-height   : var(--pill-h-sm);
+    border-radius: var(--radius-pill);
+    background   : var(--wa-color-neutral-fill-quiet);
+    color        : var(--wa-color-text-quiet);
+    border       : 1px solid var(--wa-color-surface-border);
+    flex-shrink  : 0;
+    white-space  : nowrap;
+}
+
+/* Compact: hide text, show first letter via ::before */
+.tag-pill.tag-pill-compact {
+    padding: 1px 6px;
+}
+
+.tag-pill.tag-pill-compact .tag-pill-text {
+    display: none;
+}
+
+.tag-pill.tag-pill-compact::before {
+    content    : attr(data-first);
+    font-weight: 600;
+}
+
+/* +N overflow indicator */
+.tag-pill-more {
+    font-size  : 11px;
+    font-weight: 500;
+    color      : var(--wa-color-text-quiet);
+    padding    : 0 0 0 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self : center;
+}
+
+/* Container class used by dashboard cards */
 .card-tags {
-    display      : flex;
-    flex-wrap    : nowrap;
-    overflow     : hidden;
-    gap          : var(--wa-space-2xs);
     margin-bottom: var(--wa-space-xs);
 }
 
+/* Keep old .card-tag rules as aliases so nothing breaks */
 .card-tag {
     display      : inline-flex;
     align-items  : center;
@@ -497,29 +544,12 @@
     white-space  : nowrap;
 }
 
-/* Compact tag: first letter only */
-.card-tag.card-tag-compact {
-    padding: 1px 6px;
-}
-
-.card-tag.card-tag-compact .badge-text {
-    display: none;
-}
-
-.card-tag.card-tag-compact::before {
-    content    : attr(data-first);
-    font-weight: 600;
-}
-
-/* Plain +N overflow indicator — no pill */
+.card-tag.card-tag-compact { padding: 1px 6px; }
+.card-tag.card-tag-compact .badge-text { display: none; }
+.card-tag.card-tag-compact::before { content: attr(data-first); font-weight: 600; }
 .card-tag-more {
-    font-size  : 11px;
-    font-weight: 500;
-    color      : var(--wa-color-text-quiet);
-    padding    : 0 0 0 2px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    align-self : center;
+    font-size: 11px; font-weight: 500; color: var(--wa-color-text-quiet);
+    padding: 0 0 0 2px; white-space: nowrap; flex-shrink: 0; align-self: center;
 }
 
 .card-footer {

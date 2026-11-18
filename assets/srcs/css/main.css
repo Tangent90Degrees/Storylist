@@ -11,6 +11,7 @@
 @import './switcher.css';
 @import './editing.css';
 @import './schema.css';
+@import './board.css';
 
 /* ── 1. Custom tokens & font setup ───────────────────────── */
 :root {
@@ -135,98 +136,245 @@ h3 {
     z-index       : 10;
 }
 
-.sidebar-header {
-    display        : flex;
-    align-items    : center;
-    justify-content: space-between;
-    padding        : var(--wa-space-m) var(--wa-space-m) var(--wa-space-s);
+/* ── Storybook info panel ── */
+.sb-info {
+    position     : relative;
+    border-bottom: 1px solid var(--wa-color-surface-border);
 }
 
-.app-logo {
+.sb-info-current {
     display    : flex;
     align-items: center;
-    gap        : var(--wa-space-xs);
+    gap        : var(--wa-space-s);
+    padding    : var(--wa-space-m);
+    cursor     : pointer;
+    transition : background var(--wa-transition-fast);
+    user-select: none;
 }
 
-.logo-text {
-    font-weight   : 700;
-    font-size     : 1.15rem;
-    letter-spacing: -0.4px;
-    color         : var(--wa-color-text-normal);
-}
-
-.sidebar-section-label {
-    padding       : var(--wa-space-m) var(--wa-space-m) var(--wa-space-xs);
-    font-size     : 11px;
-    font-weight   : 600;
-    color         : var(--wa-color-text-quiet);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-
-.storybook-list {
-    flex      : 1;
-    overflow-y: auto;
-    padding   : 0 var(--wa-space-s) var(--wa-space-s);
-}
-
-.sb-empty {
-    padding  : var(--wa-space-s) var(--wa-space-xs);
-    font-size: 12px;
-    color    : var(--wa-color-text-quiet);
-}
-
-.sb-item {
-    display      : flex;
-    align-items  : center;
-    gap          : var(--wa-space-s);
-    padding      : var(--wa-space-xs) var(--wa-space-s);
-    border-radius: var(--radius);
-    cursor       : pointer;
-    transition   : background var(--wa-transition-fast);
-    margin-bottom: 2px;
-    position     : relative;
-}
-
-.sb-item:hover {
+.sb-info-current:hover {
     background: var(--wa-color-neutral-fill-quiet);
 }
 
-.sb-item.active {
+.sb-info-avatar {
+    width          : 36px;
+    height         : 36px;
+    border-radius  : var(--radius);
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    flex-shrink    : 0;
+    font-size      : 1em;
+}
+
+.sb-info-text {
+    flex      : 1;
+    min-width : 0;
+    display   : flex;
+    flex-direction: column;
+    gap       : 1px;
+}
+
+.sb-info-name {
+    font-size    : 13px;
+    font-weight  : 600;
+    color        : var(--wa-color-text-normal);
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+    line-height  : 1.3;
+}
+
+.sb-info-author {
+    font-size    : 11px;
+    color        : var(--wa-color-text-quiet);
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
+    line-height  : 1.3;
+}
+
+.sb-info-chevron {
+    font-size  : 0.7em;
+    color      : var(--wa-color-text-quiet);
+    flex-shrink: 0;
+    transition : transform var(--wa-transition-fast);
+}
+
+.sb-info.open .sb-info-chevron {
+    transform: rotate(180deg);
+}
+
+/* ── Storybook dropdown ── */
+.sb-dropdown {
+    position     : absolute;
+    top          : calc(100% + 4px);
+    left         : var(--wa-space-s);
+    right        : var(--wa-space-s);
+    background   : var(--wa-color-surface-default);
+    border       : 1px solid var(--wa-color-surface-border);
+    border-radius: var(--radius);
+    box-shadow   : var(--wa-shadow-m);
+    z-index      : 100;
+    overflow     : hidden;
+    max-height   : 320px;
+    display      : flex;
+    flex-direction: column;
+}
+
+.sb-dropdown.hidden {
+    display: none;
+}
+
+.sb-dd-item {
+    display    : flex;
+    align-items: center;
+    gap        : var(--wa-space-s);
+    padding    : var(--wa-space-xs) var(--wa-space-s);
+    cursor     : pointer;
+    transition : background var(--wa-transition-fast);
+    min-width  : 0;
+}
+
+.sb-dd-item:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+}
+
+.sb-dd-item.active {
     background: var(--wa-color-brand-fill-quiet);
 }
 
-.sb-item.active .sb-name {
-    color      : var(--accent-text);
-    font-weight: 600;
-}
-
-.sb-icon {
-    width          : 30px;
-    height         : 30px;
+.sb-dd-icon {
+    width          : 28px;
+    height         : 28px;
     border-radius  : var(--radius-sm);
     display        : flex;
     align-items    : center;
     justify-content: center;
     flex-shrink    : 0;
-    font-size      : 0.9em;
+    font-size      : 0.85em;
 }
 
-.sb-name {
-    flex         : 1;
-    font-size    : 13px;
+.sb-dd-text {
+    flex      : 1;
+    min-width : 0;
+    display   : flex;
+    flex-direction: column;
+    gap       : 1px;
+}
+
+.sb-dd-name {
+    font-size    : 12px;
+    font-weight  : 500;
+    color        : var(--wa-color-text-normal);
     overflow     : hidden;
     text-overflow: ellipsis;
     white-space  : nowrap;
 }
 
-.sb-edit {
-    opacity   : 0;
-    transition: opacity var(--wa-transition-fast);
+.sb-dd-author {
+    font-size    : 11px;
+    color        : var(--wa-color-text-quiet);
+    overflow     : hidden;
+    text-overflow: ellipsis;
+    white-space  : nowrap;
 }
 
-.sb-item:hover .sb-edit {
+.sb-dd-edit {
+    display        : flex;
+    align-items    : center;
+    justify-content: center;
+    width          : 26px;
+    height         : 26px;
+    flex-shrink    : 0;
+    border         : none;
+    background     : none;
+    color          : var(--wa-color-text-quiet);
+    font-size      : 11px;
+    border-radius  : var(--radius-sm);
+    cursor         : pointer;
+    opacity        : 0;
+    transition     : opacity var(--wa-transition-fast), background var(--wa-transition-fast);
+}
+
+.sb-dd-item:hover .sb-dd-edit {
     opacity: 1;
+}
+
+.sb-dd-edit:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+    color     : var(--wa-color-text-normal);
+}
+
+.sb-dd-new {
+    border-top: 1px solid var(--wa-color-surface-border);
+    padding   : 4px;
+}
+
+.sb-dd-new-btn {
+    display      : flex;
+    align-items  : center;
+    gap          : 6px;
+    width        : 100%;
+    padding      : var(--wa-space-xs) var(--wa-space-s);
+    border        : none;
+    border-radius: var(--radius-sm);
+    background   : none;
+    color        : var(--wa-color-text-quiet);
+    font-size    : 12px;
+    font-family  : inherit;
+    cursor       : pointer;
+    text-align   : left;
+    transition   : background var(--wa-transition-fast), color var(--wa-transition-fast);
+}
+
+.sb-dd-new-btn:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+    color     : var(--wa-color-text-normal);
+}
+
+.sb-dd-new-btn wa-icon {
+    font-size: 0.85em;
+}
+
+/* ── Sidebar nav ── */
+.sidebar-nav {
+    display       : flex;
+    flex-direction: column;
+    gap           : 2px;
+    padding       : var(--wa-space-s) var(--wa-space-s) 0;
+}
+
+.sidebar-nav-item {
+    display      : flex;
+    align-items  : center;
+    gap          : var(--wa-space-s);
+    padding      : var(--wa-space-xs) var(--wa-space-s);
+    border-radius: var(--radius);
+    border       : none;
+    background   : none;
+    color        : var(--wa-color-text-quiet);
+    font-size    : 13px;
+    font-family  : inherit;
+    font-weight  : 500;
+    cursor       : pointer;
+    text-align   : left;
+    transition   : background var(--wa-transition-fast), color var(--wa-transition-fast);
+}
+
+.sidebar-nav-item wa-icon {
+    font-size  : 0.9em;
+    flex-shrink: 0;
+}
+
+.sidebar-nav-item:hover {
+    background: var(--wa-color-neutral-fill-quiet);
+    color     : var(--wa-color-text-normal);
+}
+
+.sidebar-nav-item.active {
+    background: var(--wa-color-brand-fill-quiet);
+    color     : var(--accent-text);
 }
 
 .sidebar-footer {
@@ -247,6 +395,14 @@ h3 {
 #main-content {
     flex      : 1;
     overflow-y: auto;
+    display   : flex;
+    flex-direction: column;
+}
+
+#board-container {
+    flex      : 1;
+    min-height: 0;
+    overflow  : hidden;
 }
 
 /* ── 6. Toolbar ──────────────────────────────────────────── */

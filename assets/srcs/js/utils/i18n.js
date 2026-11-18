@@ -149,6 +149,13 @@ const translations = {
         pasteProperty: 'Paste property',
         pastePropertyConfirm: 'Replace this property with the copied configuration?',
         collapse: 'Collapse',
+        addBoard: 'New Board',
+        board: 'Board',
+        addCard: 'Add Card',
+        boardName: 'Board Name',
+        untitledBoard: 'Untitled Board',
+        deleteBoard: 'Delete Board',
+        deleteBoardConfirm: 'Delete this board?',
     },
     zh: {
         appName: 'Storier',
@@ -297,6 +304,13 @@ const translations = {
         pasteProperty: '粘贴属性',
         pastePropertyConfirm: '将此属性替换为已复制的配置？',
         collapse: '折叠',
+        addBoard: '新建看板',
+        board: '看板',
+        addCard: '添加卡片',
+        boardName: '看板名称',
+        untitledBoard: '未命名看板',
+        deleteBoard: '删除看板',
+        deleteBoardConfirm: '确定要删除此看板？',
     }
 }
 

@@ -6,7 +6,8 @@ import DEFAULT_TYPES from '../data/defaultTypes.js'
 export default class Storybook {
     constructor({
         id, name, author, category, color, icon,
-        elementTypes, elementGroups, createdAt, updatedAt
+        elementTypes, elementGroups, boards,
+        createdAt, updatedAt
     } = {}) {
         this.id = id || uuid()
         this.name = name || 'New Storybook'
@@ -21,6 +22,12 @@ export default class Storybook {
         const rawTypes = elementTypes?.length ? elementTypes : DEFAULT_TYPES
         this.elementTypes = rawTypes.map(t => ElementType.fromJSON(t))
         this.elementGroups = (elementGroups || []).map(g => ElementGroup.fromJSON(g))
+        this.boards = (boards || []).map(b => ({
+            id: b.id || uuid(),
+            name: b.name || 'Board',
+            cards: (b.cards || []).map(c => ({ ...c })),
+            lines: (b.lines || []).map(l => ({ ...l }))
+        }))
     }
 
     touch() {
@@ -72,6 +79,12 @@ export default class Storybook {
             icon: this.icon,
             elementTypes: this.elementTypes.map(t => t.toJSON()),
             elementGroups: this.elementGroups.map(g => g.toJSON()),
+            boards: this.boards.map(b => ({
+                id: b.id,
+                name: b.name,
+                cards: b.cards.map(c => ({ ...c })),
+                lines: (b.lines || []).map(l => ({ ...l }))
+            })),
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
         }
